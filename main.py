@@ -18,4 +18,4 @@ preferences = {
 
 recommender = FeatureRecommender(data)
 recomendation = recommender.recommend(feature,preferences)
-print("Recomendation for ", feature, ' is ', recomendation)
+print("Recomendation for", feature, 'is', recomendation)
