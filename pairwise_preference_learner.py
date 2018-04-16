@@ -80,3 +80,5 @@ print(rank)
 #TODO fazer esse pairwise levar em consideração features recomendadas
 #TODO organizar para não replicar código
 #TODO generalizar a recomendação para colunos que possam não ser numéricas
+
+#TODO problema dessa abordagem é o errar por não possuir dados da classe correta em um dos classificadores binarios
