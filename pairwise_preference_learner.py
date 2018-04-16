@@ -58,9 +58,25 @@ for c1, c2 in classes_pairs:
     #guardo o modelo gerado para esse par
     preferences_relations.append(PreferenceRelation((c1, c2), neigh, X_encoder))
 
-instance = convert_instance(X_encoder, X.iloc[0, :])
-#essa predict_proba já me 'traz' a relação de preferência
-#TODO usar apenas o primeiro eixo que significa a preferencia pela classe c1
-print(neigh.predict_proba([instance]))
+#inicializo os 'votos' zerados
+voting_classes = dict.fromkeys(classes,0)
+# recupero a probabilidade de predição de cada classificador que utilizou a classe em questão
+# e somo a sua 'votação' os 'votos' desse classificador
+for class_ in classes:
+    for relation in preferences_relations:
+        if class_ in relation.classes:
+            sorted_classes = sorted(relation.classes)
+            instance = convert_instance(relation.encoder, X.iloc[0, :])
+            prob_sorted_by_classes = relation.classifier.predict_proba([instance])[0]
+            if sorted_classes.index(class_) == 0:
+                voting_classes[class_] += prob_sorted_by_classes[0]
+            else:
+                voting_classes[class_] += prob_sorted_by_classes[1]
 
-#TODO fazer a combinação entre as preferência em um ranking propriamente dito
+#ordeno o dicionario pelos valores, trazendo o rank
+rank = sorted(voting_classes.items(), key=lambda x: x[1], reverse=True)
+print(rank)
+
+#TODO fazer esse pairwise levar em consideração features recomendadas
+#TODO organizar para não replicar código
+#TODO generalizar a recomendação para colunos que possam não ser numéricas
