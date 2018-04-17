@@ -1,5 +1,6 @@
 import pandas as pd
-from feature_recommender import FeatureRecommender
+from knn_feature_recommender import KNNFeatureRecommender
+from rank_feature_recommender import RankFeatureRecommender
 
 # lendo dados originais, preciso desse float precision pra ele não arredondar
 data = pd.read_csv('data.csv', float_precision='round_trip')
@@ -16,6 +17,10 @@ preferences = {
     'prob2': 1588.4588012017
 }
 
-recommender = FeatureRecommender(data)
-recomendation = recommender.recommend(feature,preferences)
+recommender = KNNFeatureRecommender(data)
+recomendation = recommender.recommend(feature, preferences)
+print("Recomendation for", feature, 'is', recomendation)
+
+recommender = RankFeatureRecommender(data)
+recomendation = recommender.recommend(feature, preferences)
 print("Recomendation for", feature, 'is', recomendation)
