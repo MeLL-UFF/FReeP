@@ -1,9 +1,12 @@
 # source activate py35
 from functools import reduce
 from abc import ABC, abstractmethod
+from sklearn.preprocessing import LabelEncoder
+from numbers import Number
 
 
 class FeatureRecommender(ABC):
+    NEIGHBORS = 3
 
     def __init__(self, data):
         self.data = data
@@ -25,15 +28,28 @@ class FeatureRecommender(ABC):
                 partition = partition[partition[item] == preferences[item]]
             # pode ser que não tenha nenhuma proveniencia que obdeca os filtros de dados
             if len(partition) > 0:
+                if not isinstance(partition[feature].values[0], Number):
+                    self.label_encoder = LabelEncoder()
+                    partition[feature] = self.label_encoder.fit_transform(partition[feature].values)
+                else:
+                    self.label_encoder = None
                 vote = self.recommender(partition, feature, preferences)
-                votes.append(vote)
-
+                if self.label_encoder is None:
+                    votes.append(vote)
+                else:
+                    try:
+                        votes.append(self.label_encoder.inverse_transform(vote))
+                        self.label_encoder = None
+                    except:
+                        votes.append(self.label_encoder.inverse_transform(vote[0][0]))
+                        self.label_encoder = None
         return self.recomendation(votes)
 
     # função que cria os conjunto das partes de um array
     def list_powerset(self, lst):
         return reduce(lambda result, x: result + [subset + [x] for subset in result],
                       lst, [[]])
+
     @abstractmethod
     def recommender(self, data, feature, preferences):
         """Primitive operation. You HAVE TO override me, I'm a placeholder."""
@@ -43,3 +59,8 @@ class FeatureRecommender(ABC):
     def recomendation(self, votes):
         """Primitive operation. You HAVE TO override me, I'm a placeholder."""
         pass
+
+
+#TODO Atualizar o scikit-learn quando sair proxima release para parar de dar warning do numpy
+import warnings
+warnings.simplefilter("ignore", DeprecationWarning)

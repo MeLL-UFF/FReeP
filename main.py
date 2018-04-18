@@ -17,10 +17,32 @@ preferences = {
     'prob2': 1588.4588012017
 }
 
+print("Preferências: ", preferences)
 recommender = KNNFeatureRecommender(data)
 recomendation = recommender.recommend(feature, preferences)
-print("Recomendation for", feature, 'is', recomendation)
+print("Recomendação por KNN para", feature, 'é', recomendation)
 
 recommender = RankFeatureRecommender(data)
 recomendation = recommender.recommend(feature, preferences)
-print("Recomendation for", feature, 'is', recomendation)
+print("Recomendação por RANK para", feature, 'é', recomendation)
+
+print("\n##################################################\n")
+# to fazendo de conta que vou querer recomendar a coluna 'num_aligns'
+feature = 'model2'
+# minhas preferências
+preferences = {
+    'length': 237.0,
+    'model1': 'WAG+G',
+    'prob1': 1588.4588012017,
+    'num_aligns': 10.0,
+    'prob2': 1588.4588012017
+}
+
+print("Preferências: ", preferences)
+recommender = KNNFeatureRecommender(data)
+recomendation = recommender.recommend(feature, preferences)
+print("Recomendação por KNN para", feature, 'é', recomendation)
+
+recommender = RankFeatureRecommender(data)
+recomendation = recommender.recommend(feature, preferences)
+print("Recomendação por RANK para", feature, 'é', recomendation)
