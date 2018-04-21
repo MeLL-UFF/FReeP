@@ -4,6 +4,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from feature_recommender import FeatureRecommender
 from collections import Counter
 
+
 class KNNFeatureRecommender(FeatureRecommender):
 
     def __init__(self, data, weights=False):
@@ -29,8 +30,11 @@ class KNNFeatureRecommender(FeatureRecommender):
             label = item.split('_dummy_')[0]
             value = item.split('_dummy_')[1]
             # crio a instância para classificação no formato do One-Hot encoding
-            if preferences[label] == value or preferences[label] == float(value):
-                test.append(1)
+            if label in preferences:
+                if preferences[label] == value or preferences[label] == float(value):
+                    test.append(1)
+                else:
+                    test.append(0)
             else:
                 test.append(0)
         return neigh.predict([test])[0]

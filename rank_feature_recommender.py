@@ -25,6 +25,7 @@ class RankFeatureRecommender(FeatureRecommender):
         preferences_relations = []
         for c1, c2 in classes_pairs:
             # só me importa os dados que pertença a uma das classes
+            #TODO tenho que verificar como adicionar a galera que não pertence
             preferences = pd.concat([data[data[feature] == c1], data[data[feature] == c2]])
             X = preferences.loc[:, preferences.columns != feature]
             y = preferences.loc[:, preferences.columns == feature]

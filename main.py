@@ -10,7 +10,7 @@ data = data.loc[data['erro'] == False].drop('erro', axis=1)
 feature = 'num_aligns'
 # minhas preferências
 preferences = {
-    'length': 237.0,
+    #'length': 237.0,
     'model1': 'WAG+G',
     'prob1': 1588.4588012017,
     'model2': 'WAG+G',
@@ -31,7 +31,7 @@ print("\n##################################################\n")
 feature = 'model2'
 # minhas preferências
 preferences = {
-    'length': 237.0,
+    # 'length': 237.0,
     'model1': 'WAG+G',
     'prob1': 1588.4588012017,
     'num_aligns': 10.0,

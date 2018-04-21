@@ -14,16 +14,23 @@ class FeatureRecommender(ABC):
     # Feature é uma coluna de um dataFrame
     # Preferences é um dictionary
     def recommend(self, feature, preferences):
+        columns = list(preferences.keys())
+        columns.append(feature)
+        all_columns = list(self.data.columns)
+        not_in_preferences = list(set(all_columns) - set(columns))
         # conjunto das partes de todas as colunas das preferências, exceto o vazio
         preferences_power_set = self.list_powerset(preferences.keys())[1:]
         votes = []
-        for set in preferences_power_set:
-            partition_set = set.copy()
+        for preference_set in preferences_power_set:
+            partition_set = preference_set.copy()
+            #adiciono as colunas que não fazem parte nem das preferencias nem é feature
+            if not_in_preferences:
+                partition_set.extend(not_in_preferences)
             # adiciono a coluna que quero recomendar na ultima coluna
             partition_set.append(feature)
             # todos os registros apenas com as features deste conjunto
             partition = self.data[partition_set]
-            for item in set:
+            for item in preference_set:
                 # filtro os registros que possuem os mesmos valores das preferências
                 partition = partition[partition[item] == preferences[item]]
             # pode ser que não tenha nenhuma proveniencia que obdeca os filtros de dados
