@@ -1,79 +1,45 @@
 # source activate py35
-import csv
-import random
-import math
-import operator
+import pandas as pd
+from feature_recommender import FeatureRecommender
+from custom_knn import CustomKNN
+from collections import Counter
 
-def loadDataset(filename, split, trainingSet=[], testSet=[]):
-    with open(filename, 'r') as csvfile:
-        lines = csv.reader(csvfile)
-        dataset = list(lines)
-        for x in range(len(dataset) - 1):
-            for y in range(4):
-                dataset[x][y] = float(dataset[x][y])
-            if random.random() < split:
-                trainingSet.append(dataset[x])
+
+class CustomKNNFeatureRecommender(FeatureRecommender):
+
+    def __init__(self, data, weights=[]):
+        super(CustomKNNFeatureRecommender, self).__init__(data, weights)
+
+    def recommender(self, data, feature, preferences, weights=[]):
+        # X = todas as colunas menos a última, Y= última
+        X = data.iloc[:, :-1]
+        y = data.iloc[:, -1]
+        # forço todas as colunas serem string
+        X = X.astype(str)
+        # One-hot encoding
+        X = pd.get_dummies(X, prefix_sep="_dummy_")
+        # todas as novas colunas após o encoding
+        X_encoder = list(X)
+        X['class']=y
+        neigh = CustomKNN(X.values,k=FeatureRecommender.NEIGHBORS, weights=weights)
+        test = []
+        # X é codificado como One-Hot encoding, entao todas as colunas sao 0 ou 1
+        for item in X_encoder:
+            # O pd.get_dummies cria colunas do tipo coluna_valor
+            label = item.split('_dummy_')[0]
+            value = item.split('_dummy_')[1]
+            # crio a instância para classificação no formato do One-Hot encoding
+            if label in preferences:
+                if preferences[label] == value or preferences[label] == float(value):
+                    test.append(1)
+                else:
+                    test.append(0)
             else:
-                testSet.append(dataset[x])
+                test.append(0)
+        return neigh.predict([test])[0]
 
-
-def euclideanDistance(instance1, instance2, length):
-    distance = 0
-    for x in range(length):
-        distance += pow((instance1[x] - instance2[x]), 2)
-    return math.sqrt(distance)
-
-
-def getNeighbors(trainingSet, testInstance, k):
-    distances = []
-    length = len(testInstance) - 1
-    for x in range(len(trainingSet)):
-        dist = euclideanDistance(testInstance, trainingSet[x], length)
-        distances.append((trainingSet[x], dist))
-    distances.sort(key=operator.itemgetter(1))
-    neighbors = []
-    for x in range(k):
-        neighbors.append(distances[x][0])
-    return neighbors
-
-
-def getResponse(neighbors):
-    classVotes = {}
-    for x in range(len(neighbors)):
-        response = neighbors[x][-1]
-        if response in classVotes:
-            classVotes[response] += 1
-        else:
-            classVotes[response] = 1
-    sortedVotes = sorted(classVotes.items(), key=operator.itemgetter(1), reverse=True)
-    return sortedVotes[0][0]
-
-
-def getAccuracy(testSet, predictions):
-    correct = 0
-    for x in range(len(testSet)):
-        if testSet[x][-1] == predictions[x]:
-            correct += 1
-    return (correct / float(len(testSet))) * 100.0
-
-
-def main():
-    # prepare data
-    trainingSet = []
-    testSet = []
-    split = 0.67
-    loadDataset('iris.data', split, trainingSet, testSet)
-
-    # generate predictions
-    predictions = []
-    k = 3
-    for x in range(len(testSet)):
-        neighbors = getNeighbors(trainingSet, testSet[x], k)
-        result = getResponse(neighbors)
-        predictions.append(result)
-        print('> predicted=' + repr(result) + ', actual=' + repr(testSet[x][-1]))
-    accuracy = getAccuracy(testSet, predictions)
-    print('Accuracy: ' + repr(accuracy) + '%')
-
-
-main()
+    def recomendation(self, votes):
+        c = Counter(votes)
+        resp = c.most_common(1)[0][0]
+        confidence = c.most_common(1)[0][1] / float(len(votes))
+        return (resp, confidence)

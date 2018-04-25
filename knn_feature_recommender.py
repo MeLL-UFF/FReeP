@@ -6,12 +6,10 @@ from collections import Counter
 
 
 class KNNFeatureRecommender(FeatureRecommender):
+    def __init__(self, data, weights=[]):
+        super(KNNFeatureRecommender, self).__init__(data, weights)
 
-    def __init__(self, data, weights=False):
-        super(KNNFeatureRecommender, self).__init__(data)
-        self.weights = weights
-
-    def recommender(self, data, feature, preferences):
+    def recommender(self, data, feature, preferences, weights):
         # X = todas as colunas menos a última, Y= última
         X = data.iloc[:, :-1]
         y = data.iloc[:, -1]

@@ -14,10 +14,10 @@ class PreferenceRelation():
 
 class RankFeatureRecommender(FeatureRecommender):
 
-    def __init__(self, data):
-        super(RankFeatureRecommender, self).__init__(data)
+    def __init__(self, data, weights=[]):
+        super(RankFeatureRecommender, self).__init__(data,weights)
 
-    def recommender(self, data, feature, preferences):
+    def recommender(self, data, feature, preferences, weights):
         # as classes do meu problema são os valores da feature que quero recomendar
         classes = data[feature].unique()
         # combino dois a dois das classes

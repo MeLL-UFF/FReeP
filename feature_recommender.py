@@ -8,8 +8,9 @@ from numbers import Number
 class FeatureRecommender(ABC):
     NEIGHBORS = 3
 
-    def __init__(self, data):
+    def __init__(self, data, weights=[]):
         self.data = data
+        self.weights = weights
 
     # Feature é uma coluna de um dataFrame
     # Preferences é um dictionary
@@ -23,15 +24,19 @@ class FeatureRecommender(ABC):
         votes = []
         for preference_set in preferences_power_set:
             partition_set = preference_set.copy()
-            #adiciono as colunas que não fazem parte nem das preferencias nem é feature
+            # adiciono as colunas que não fazem parte nem das preferencias nem é feature
             if not_in_preferences:
                 partition_set.extend(not_in_preferences)
             # adiciono a coluna que quero recomendar na ultima coluna
             partition_set.append(feature)
             # todos os registros apenas com as features deste conjunto
             partition = self.data[partition_set]
+            partition_weights = []
             for item in preference_set:
                 # filtro os registros que possuem os mesmos valores das preferências
+                if len(self.weights) > 0:
+                    #indices dos pesos associados a essa partição
+                    partition_weights = partition[partition[item] == preferences[item]].index
                 partition = partition[partition[item] == preferences[item]]
             # pode ser que não tenha nenhuma proveniencia que obdeca os filtros de dados
             if len(partition) > 0:
@@ -40,7 +45,10 @@ class FeatureRecommender(ABC):
                     partition[feature] = self.label_encoder.fit_transform(partition[feature].values)
                 else:
                     self.label_encoder = None
-                vote = self.recommender(partition, feature, preferences)
+                if len(self.weights) > 0:
+                    #pesos a partir dos indices de pesos
+                    partition_weights = [self.weights[i] for i in partition_weights]
+                vote = self.recommender(partition, feature, preferences, partition_weights)
                 if self.label_encoder is None:
                     votes.append(vote)
                 else:
@@ -58,7 +66,7 @@ class FeatureRecommender(ABC):
                       lst, [[]])
 
     @abstractmethod
-    def recommender(self, data, feature, preferences):
+    def recommender(self, data, feature, preferences, weights):
         """Primitive operation. You HAVE TO override me, I'm a placeholder."""
         pass
 
@@ -68,6 +76,7 @@ class FeatureRecommender(ABC):
         pass
 
 
-#TODO Atualizar o scikit-learn quando sair proxima release para parar de dar warning do numpy
+# TODO Atualizar o scikit-learn quando sair proxima release para parar de dar warning do numpy
 import warnings
+
 warnings.simplefilter("ignore", DeprecationWarning)
