@@ -1,5 +1,5 @@
 import pandas as pd
-from knn_feature_recommender import KNNFeatureRecommender
+from custom_knn_feature_recommender import KNNFeatureRecommender
 from rank_feature_recommender import RankFeatureRecommender
 
 # lendo dados originais, preciso desse float precision pra ele não arredondar
