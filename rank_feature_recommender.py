@@ -3,6 +3,7 @@ import itertools
 from sklearn.neighbors import KNeighborsClassifier
 import numbers
 from feature_recommender import FeatureRecommender
+import numpy as np
 
 
 class PreferenceRelation():
@@ -60,9 +61,9 @@ class RankFeatureRecommender(FeatureRecommender):
         classes_set = set([t[0] for rank in votes for t in rank])
         classes = dict.fromkeys(classes_set, 0)
         for rank in votes:
-            weight = len(rank)
+            weight = len(rank) - 1
             for vote in rank:
-                classes[vote[0]] += weight
+                classes[vote[0]] += np.power(2, weight)
                 weight -= 1
         ordered_preferences = self.rank(classes)
         resp = ordered_preferences[0][0]

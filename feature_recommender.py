@@ -56,7 +56,7 @@ class FeatureRecommender(ABC):
                         votes.append(self.label_encoder.inverse_transform(vote))
                         self.label_encoder = None
                     except:
-                        votes.append(self.label_encoder.inverse_transform(vote[0][0]))
+                        votes.append([self.label_encoder.inverse_transform(vote[0][0])])
                         self.label_encoder = None
         return self.recomendation(votes)
 

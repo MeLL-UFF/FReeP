@@ -1,10 +1,6 @@
 # source activate py35
-import csv
-import random
 import math
 import operator
-import numpy as np
-
 
 class CustomKNN():
     def __init__(self, training_data, k=3, weights=[]):
