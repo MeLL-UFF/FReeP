@@ -39,7 +39,7 @@ class FeatureRecommender(ABC):
                     partition_weights = partition[partition[item] == preferences[item]].index
                 partition = partition[partition[item] == preferences[item]]
             # pode ser que não tenha nenhuma proveniencia que obdeca os filtros de dados
-            if len(partition) > 0:
+            if len(partition) >= FeatureRecommender.NEIGHBORS:
                 if not isinstance(partition[feature].values[0], Number):
                     self.label_encoder = LabelEncoder()
                     partition[feature] = self.label_encoder.fit_transform(partition[feature].values)
@@ -58,7 +58,10 @@ class FeatureRecommender(ABC):
                     except:
                         votes.append([self.label_encoder.inverse_transform(vote[0][0])])
                         self.label_encoder = None
-        return self.recomendation(votes)
+        if votes:
+            return self.recomendation(votes)
+        else:
+            return None
 
     # função que cria os conjunto das partes de um array
     def list_powerset(self, lst):

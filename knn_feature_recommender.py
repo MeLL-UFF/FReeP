@@ -14,6 +14,8 @@ class KNNFeatureRecommender(FeatureRecommender):
         X = data.iloc[:, :-1]
         y = data.iloc[:, -1]
         # forço todas as colunas serem string
+        if isinstance(y.values[0], float):
+            y = y.astype(str)
         X = X.astype(str)
         # One-hot encoding
         X = pd.get_dummies(X, prefix_sep="_dummy_")

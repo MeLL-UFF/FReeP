@@ -37,7 +37,10 @@ class RankFeatureRecommender(FeatureRecommender):
                 X_ = pd.get_dummies(X_, prefix_sep='_dummy_')
                 # todas as novas colunas após o encoding
                 X_encoder = list(X_)
-                neigh.fit(X_.values, y.values.ravel())
+                y = y.values.ravel()
+                if isinstance(y[0], float):
+                    y = [str(y_) for y_ in y]
+                neigh.fit(X_.values, y)
                 # guardo o modelo gerado para esse par
                 preferences_relations.append(PreferenceRelation((c1, c2), neigh, X_encoder))
         # inicializo os 'votos' zerados
