@@ -3,6 +3,7 @@ from functools import reduce
 from abc import ABC, abstractmethod
 from sklearn.preprocessing import LabelEncoder
 from numbers import Number
+import numpy as np
 
 
 class FeatureRecommender(ABC):
@@ -35,7 +36,7 @@ class FeatureRecommender(ABC):
             for item in preference_set:
                 # filtro os registros que possuem os mesmos valores das preferências
                 if len(self.weights) > 0:
-                    #indices dos pesos associados a essa partição
+                    # indices dos pesos associados a essa partição
                     partition_weights = partition[partition[item] == preferences[item]].index
                 partition = partition[partition[item] == preferences[item]]
             # pode ser que não tenha nenhuma proveniencia que obdeca os filtros de dados
@@ -46,17 +47,31 @@ class FeatureRecommender(ABC):
                 else:
                     self.label_encoder = None
                 if len(self.weights) > 0:
-                    #pesos a partir dos indices de pesos
+                    # pesos a partir dos indices de pesos
                     partition_weights = [self.weights[i] for i in partition_weights]
                 vote = self.recommender(partition, feature, preferences, partition_weights)
                 if self.label_encoder is None:
                     votes.append(vote)
                 else:
                     try:
-                        votes.append(self.label_encoder.inverse_transform(vote))
-                        self.label_encoder = None
+                        #só um no rank
+                        # import pdb
+                        # pdb.set_trace()
+                        decode = self.label_encoder.inverse_transform(vote[0][0])
+                        votes.append([(decode,vote[0][1])])
+                        # import pdb
+                        # pdb.set_trace()
+                        # if isinstance(decode, np.ndarray):
+                        #     decode = decode[0][0]
+                        # self.label_encoder = None
+                        # votes.append(decode)
                     except:
-                        votes.append([self.label_encoder.inverse_transform(vote[0][0])])
+                        ##rank com mais de um elemento
+                        rank_ = []
+                        for candidate in vote:
+                            candidate_decoded = self.label_encoder.inverse_transform(candidate[0])
+                            rank_.append((candidate_decoded, candidate[1]))
+                        votes.append(rank_)
                         self.label_encoder = None
         if votes:
             return self.recomendation(votes)

@@ -16,7 +16,7 @@ class PreferenceRelation():
 class RankFeatureRecommender(FeatureRecommender):
 
     def __init__(self, data, weights=[]):
-        super(RankFeatureRecommender, self).__init__(data,weights)
+        super(RankFeatureRecommender, self).__init__(data, weights)
 
     def recommender(self, data, feature, preferences, weights):
         # as classes do meu problema são os valores da feature que quero recomendar
@@ -26,7 +26,7 @@ class RankFeatureRecommender(FeatureRecommender):
         preferences_relations = []
         for c1, c2 in classes_pairs:
             # só me importa os dados que pertença a uma das classes
-            #TODO tenho que verificar como adicionar a galera que não pertence
+            # TODO tenho que verificar como adicionar a galera que não pertence
             preferences = pd.concat([data[data[feature] == c1], data[data[feature] == c2]])
             X = preferences.loc[:, preferences.columns != feature]
             y = preferences.loc[:, preferences.columns == feature]
@@ -57,17 +57,35 @@ class RankFeatureRecommender(FeatureRecommender):
                         voting_classes[class_] += prob_sorted_by_classes[0]
                     else:
                         voting_classes[class_] += prob_sorted_by_classes[1]
+        #nessa partição só existe um valor possível, então é 100% de certeza
+        if len(classes_pairs) <= 0:
+            voting_classes[[*voting_classes.keys()][0]] = 1
         return self.rank(voting_classes)
 
     def recomendation(self, votes):
         # BordaCount
+        # import pdb
+        # pdb.set_trace()
         classes_set = set([t[0] for rank in votes for t in rank])
         classes = dict.fromkeys(classes_set, 0)
+        already_voted = []
         for rank in votes:
             weight = len(rank) - 1
             for vote in rank:
+                # def y(actual_vote, votes):
+                #     return [vote for vote in votes if vote[1] == actual_vote[1]]
+                # if vote not in already_voted:
+                # draw_votes = y(vote, rank)
+                # import pdb
+                # pdb.set_trace()
                 classes[vote[0]] += np.power(2, weight)
+                # try:
+                #     already_voted +=[(k, v) for (k, v) in rank if (k, v) not in draw_votes]
+                # except:
+                #     draw_votes = [elem[0] for elem in draw_votes]
+                # already_voted += [(k, v) for (k, v) in rank if (k, v) not in draw_votes[0]]
                 weight -= 1
+            # already_voted = []
         ordered_preferences = self.rank(classes)
         resp = ordered_preferences[0][0]
         confidence = ordered_preferences[0][1] / float(len(votes))

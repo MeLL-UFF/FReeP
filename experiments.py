@@ -18,7 +18,7 @@ kf = KFold(n_splits=2)
 
 start = time.time()
 for train_index, test_index in kf.split(data):
-    knn_recommender = KNNFeatureRecommender(data.iloc[train_index])
+    # knn_recommender = KNNFeatureRecommender(data.iloc[train_index])
     rank_recommender = RankFeatureRecommender(data.iloc[train_index])
     knn_true_label = []
     knn_pred = []
@@ -29,22 +29,22 @@ for train_index, test_index in kf.split(data):
         random_feature = random.choice(list(preferences))
         true_value = preferences[random_feature]
         del preferences[random_feature]
-        knn_recomendation = knn_recommender.recommend(random_feature, preferences)
+        # knn_recomendation = knn_recommender.recommend(random_feature, preferences)
         rank_recomendation = rank_recommender.recommend(random_feature, preferences)
-        if knn_recomendation:
-            knn_true_label.append(true_value)
-            knn_pred.append(knn_recomendation)
+        # if knn_recomendation:
+        #     knn_true_label.append(true_value)
+        #     knn_pred.append(knn_recomendation)
         if rank_recomendation:
             rank_true_label.append(true_value)
             rank_pred.append(rank_recomendation)
-    knn_pred_label = [pred[0] for pred in knn_pred]
-    knn_true_label = [str(elem) for elem in knn_true_label]
+    # knn_pred_label = [pred[0] for pred in knn_pred]
+    # knn_true_label = [str(elem) for elem in knn_true_label]
     # print(knn_true)
     # print(knn_pred_label)
-    print("************KNN***********")
-    print("Acurácia: ", accuracy_score(knn_true_label, knn_pred_label))
-    print("Precisão: ", precision_score(knn_true_label, knn_pred_label, average='micro'))
-    print("Recall: ", recall_score(knn_true_label, knn_pred_label, average='micro'))
+    # print("************KNN***********")
+    # print("Acurácia: ", accuracy_score(knn_true_label, knn_pred_label))
+    # print("Precisão: ", precision_score(knn_true_label, knn_pred_label, average='micro'))
+    # print("Recall: ", recall_score(knn_true_label, knn_pred_label, average='micro'))
 
     rank_pred_label = [pred[0] for pred in rank_pred]
     rank_true_label = [str(elem) for elem in rank_true_label]
