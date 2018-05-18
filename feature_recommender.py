@@ -41,7 +41,7 @@ class FeatureRecommender(ABC):
                     partition_weights = partition[partition[item] == preferences[item]].index
                 partition = partition[partition[item] == preferences[item]]
             # pode ser que não tenha nenhuma proveniencia que obdeca os filtros de dados
-            if len(partition) >= FeatureRecommender.NEIGHBORS:
+            if len(partition) >= self.neighbors:
                 if not isinstance(partition[feature].values[0], Number):
                     self.label_encoder = LabelEncoder()
                     partition[feature] = self.label_encoder.fit_transform(partition[feature].values)

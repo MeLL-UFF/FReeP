@@ -60,10 +60,12 @@ with open('results.txt', 'w') as f:
             print("Precisão: ", knn_precision)
             print("Recall: ", knn_recall)
 
-            f.write('%s \t %d \t %d \t %d \t %d\n' % ('KNN', neighbor, knn_accuracy, knn_precision, knn_recall))
+            f.write('%s \t %d \t %f \t %f \t %f\n' % ('KNN', neighbor, knn_accuracy, knn_precision, knn_recall))
             f.write('TRUE_LABEL : ' + ', '.join([str(elem) for elem in knn_true_label]))
             f.write("\n")
             f.write('PRED_LABEL : ' + ', '.join([str(elem) for elem in knn_pred_label]))
+            f.write("\n")
+
             f.write("\n")
 
             print("************RANK***********")
@@ -78,10 +80,10 @@ with open('results.txt', 'w') as f:
             print("Precisão: ", precision_score(rank_true_label, rank_pred_label, average='micro'))
             print("Recall: ", recall_score(rank_true_label, rank_pred_label, average='micro'))
 
-            f.write('%s \t %d \t %d \t %d \t %d\n' % ('RANK', neighbor, rank_accuracy, rank_precision, rank_recall))
+            f.write('%s \t %d \t %f \t %f \t %f\n' % ('RANK', neighbor, rank_accuracy, rank_precision, rank_recall))
             f.write('TRUE_LABEL : ' + ', '.join([str(elem) for elem in rank_true_label]))
             f.write("\n")
             f.write('PRED_LABEL : ' + ', '.join([str(elem) for elem in rank_pred_label]))
             f.write("\n")
-            f.write('%s %d\n' % ("TEMPO: ", elapsed))
+            f.write('%s %f\n' % ("TEMPO: ", elapsed))
         f.write("###################")
