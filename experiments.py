@@ -14,47 +14,74 @@ data = pd.read_csv('data.csv', float_precision='round_trip')
 # apenas os dados de sucesso, sem a coluna de erro
 data = data[~data['erro']].copy().drop('erro', axis=1).reset_index(drop=True)
 
-kf = KFold(n_splits=2)
+kf = KFold(n_splits=5)
 
-start = time.time()
-for train_index, test_index in kf.split(data):
-    # knn_recommender = KNNFeatureRecommender(data.iloc[train_index])
-    rank_recommender = RankFeatureRecommender(data.iloc[train_index])
-    knn_true_label = []
-    knn_pred = []
-    rank_true_label = []
-    rank_pred = []
-    for idx in test_index:
-        preferences = data.iloc[idx].to_dict()
-        random_feature = random.choice(list(preferences))
-        true_value = preferences[random_feature]
-        del preferences[random_feature]
-        # knn_recomendation = knn_recommender.recommend(random_feature, preferences)
-        rank_recomendation = rank_recommender.recommend(random_feature, preferences)
-        # if knn_recomendation:
-        #     knn_true_label.append(true_value)
-        #     knn_pred.append(knn_recomendation)
-        if rank_recomendation:
-            rank_true_label.append(true_value)
-            rank_pred.append(rank_recomendation)
-    # knn_pred_label = [pred[0] for pred in knn_pred]
-    # knn_true_label = [str(elem) for elem in knn_true_label]
-    # print(knn_true)
-    # print(knn_pred_label)
-    # print("************KNN***********")
-    # print("Acurácia: ", accuracy_score(knn_true_label, knn_pred_label))
-    # print("Precisão: ", precision_score(knn_true_label, knn_pred_label, average='micro'))
-    # print("Recall: ", recall_score(knn_true_label, knn_pred_label, average='micro'))
+neighbors = [3, 5, 7]
 
-    rank_pred_label = [pred[0] for pred in rank_pred]
-    rank_true_label = [str(elem) for elem in rank_true_label]
-    # print(knn_true)
-    # print(knn_pred_label)
-    print("************RANK***********")
-    print("Acurácia: ", accuracy_score(rank_true_label, rank_pred_label))
-    print("Precisão: ", precision_score(rank_true_label, rank_pred_label, average='micro'))
-    print("Recall: ", recall_score(rank_true_label, rank_pred_label, average='micro'))
+with open('results.txt', 'w') as f:
+    for train_index, test_index in kf.split(data):
+        for neighbor in neighbors:
+            knn_recommender = KNNFeatureRecommender(data.iloc[train_index], neighbors=neighbor)
+            rank_recommender = RankFeatureRecommender(data.iloc[train_index], neighbors=neighbor)
+            knn_true_label = []
+            knn_pred = []
+            rank_true_label = []
+            rank_pred = []
+            start = time.time()
+            random_feature = random.choice(list(data.columns))
+            for idx in test_index:
+                preferences = data.iloc[idx].to_dict()
+                true_value = preferences[random_feature]
+                del preferences[random_feature]
+                knn_recomendation = knn_recommender.recommend(random_feature, preferences)
+                rank_recomendation = rank_recommender.recommend(random_feature, preferences)
+                if knn_recomendation:
+                    knn_true_label.append(true_value)
+                    knn_pred.append(knn_recomendation)
+                if rank_recomendation:
+                    rank_true_label.append(true_value)
+                    rank_pred.append(rank_recomendation)
+            end = time.time()
+            elapsed = end - start
+            print("Tempo (segundos): ", elapsed)
 
-end = time.time()
-elapsed = end - start
-print("Tempo (segundos): ", elapsed)
+            f.write('FEATURE: ' + random_feature + "\n")
+            f.write('%s \t %s \t %s \t %s \t %s\n' % ("MODELO", "K", "ACURACIA", "PRECISAO", "RECALL"))
+
+            print("************KNN***********")
+            knn_pred_label = [str(pred[0]) for pred in knn_pred]
+            knn_true_label = [str(elem) for elem in knn_true_label]
+            knn_accuracy = accuracy_score(knn_true_label, knn_pred_label)
+            knn_precision = precision_score(knn_true_label, knn_pred_label, average='micro')
+            knn_recall = recall_score(knn_true_label, knn_pred_label, average='micro')
+            print(knn_true_label)
+            print(knn_pred_label)
+            print("Acurácia: ", knn_accuracy)
+            print("Precisão: ", knn_precision)
+            print("Recall: ", knn_recall)
+
+            f.write('%s \t %d \t %d \t %d \t %d\n' % ('KNN', neighbor, knn_accuracy, knn_precision, knn_recall))
+            f.write('TRUE_LABEL : ' + ', '.join([str(elem) for elem in knn_true_label]))
+            f.write("\n")
+            f.write('PRED_LABEL : ' + ', '.join([str(elem) for elem in knn_pred_label]))
+            f.write("\n")
+
+            print("************RANK***********")
+            rank_pred_label = [str(pred[0]) for pred in rank_pred]
+            rank_true_label = [str(elem) for elem in rank_true_label]
+            print(rank_true_label)
+            print(rank_pred_label)
+            rank_accuracy = accuracy_score(rank_true_label, rank_pred_label)
+            rank_precision = precision_score(rank_true_label, rank_pred_label, average='micro')
+            rank_recall = recall_score(rank_true_label, rank_pred_label, average='micro')
+            print("Acurácia: ", accuracy_score(rank_true_label, rank_pred_label))
+            print("Precisão: ", precision_score(rank_true_label, rank_pred_label, average='micro'))
+            print("Recall: ", recall_score(rank_true_label, rank_pred_label, average='micro'))
+
+            f.write('%s \t %d \t %d \t %d \t %d\n' % ('RANK', neighbor, rank_accuracy, rank_precision, rank_recall))
+            f.write('TRUE_LABEL : ' + ', '.join([str(elem) for elem in rank_true_label]))
+            f.write("\n")
+            f.write('PRED_LABEL : ' + ', '.join([str(elem) for elem in rank_pred_label]))
+            f.write("\n")
+            f.write('%s %d\n' % ("TEMPO: ", elapsed))
+        f.write("###################")

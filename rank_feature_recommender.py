@@ -15,8 +15,8 @@ class PreferenceRelation():
 
 class RankFeatureRecommender(FeatureRecommender):
 
-    def __init__(self, data, weights=[]):
-        super(RankFeatureRecommender, self).__init__(data, weights)
+    def __init__(self, data, weights=[], neighbors= FeatureRecommender.NEIGHBORS):
+        super(RankFeatureRecommender, self).__init__(data, weights, neighbors)
 
     def recommender(self, data, feature, preferences, weights):
         # as classes do meu problema são os valores da feature que quero recomendar
@@ -30,8 +30,8 @@ class RankFeatureRecommender(FeatureRecommender):
             preferences = pd.concat([data[data[feature] == c1], data[data[feature] == c2]])
             X = preferences.loc[:, preferences.columns != feature]
             y = preferences.loc[:, preferences.columns == feature]
-            if len(X) >= FeatureRecommender.NEIGHBORS:
-                neigh = KNeighborsClassifier(n_neighbors=FeatureRecommender.NEIGHBORS)
+            if len(X) >= self.neighbors:
+                neigh = KNeighborsClassifier(n_neighbors=self.neighbors)
                 X_ = X.astype(str)
                 # One-hot encoding
                 X_ = pd.get_dummies(X_, prefix_sep='_dummy_')
@@ -72,20 +72,21 @@ class RankFeatureRecommender(FeatureRecommender):
         for rank in votes:
             weight = len(rank) - 1
             for vote in rank:
-                # def y(actual_vote, votes):
-                #     return [vote for vote in votes if vote[1] == actual_vote[1]]
-                # if vote not in already_voted:
-                # draw_votes = y(vote, rank)
+                def y(actual_vote, votes):
+                    return [vote for vote in votes if vote[1] == actual_vote[1]]
+                if vote not in already_voted:
+                    draw_votes = y(vote, rank)
+                    for candidate, percentage in draw_votes:
+                        classes[candidate] += np.power(2, weight) * percentage
+                    already_voted +=[(k, v) for (k, v) in draw_votes]
                 # import pdb
                 # pdb.set_trace()
-                classes[vote[0]] += np.power(2, weight)
                 # try:
-                #     already_voted +=[(k, v) for (k, v) in rank if (k, v) not in draw_votes]
                 # except:
                 #     draw_votes = [elem[0] for elem in draw_votes]
                 # already_voted += [(k, v) for (k, v) in rank if (k, v) not in draw_votes[0]]
                 weight -= 1
-            # already_voted = []
+            already_voted = []
         ordered_preferences = self.rank(classes)
         resp = ordered_preferences[0][0]
         confidence = ordered_preferences[0][1] / float(len(votes))

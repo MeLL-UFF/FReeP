@@ -9,9 +9,10 @@ import numpy as np
 class FeatureRecommender(ABC):
     NEIGHBORS = 3
 
-    def __init__(self, data, weights=[]):
+    def __init__(self, data, weights=[], neighbors = NEIGHBORS):
         self.data = data
         self.weights = weights
+        self.neighbors = neighbors
 
     # Feature é uma coluna de um dataFrame
     # Preferences é um dictionary
@@ -55,16 +56,8 @@ class FeatureRecommender(ABC):
                 else:
                     try:
                         #só um no rank
-                        # import pdb
-                        # pdb.set_trace()
                         decode = self.label_encoder.inverse_transform(vote[0][0])
                         votes.append([(decode,vote[0][1])])
-                        # import pdb
-                        # pdb.set_trace()
-                        # if isinstance(decode, np.ndarray):
-                        #     decode = decode[0][0]
-                        # self.label_encoder = None
-                        # votes.append(decode)
                     except:
                         ##rank com mais de um elemento
                         rank_ = []

@@ -6,8 +6,8 @@ from collections import Counter
 
 
 class KNNFeatureRecommender(FeatureRecommender):
-    def __init__(self, data, weights=[]):
-        super(KNNFeatureRecommender, self).__init__(data, weights)
+    def __init__(self, data, weights=[], neighbors= FeatureRecommender.NEIGHBORS):
+        super(KNNFeatureRecommender, self).__init__(data, weights, neighbors)
 
     def recommender(self, data, feature, preferences, weights):
         # X = todas as colunas menos a última, Y= última
@@ -21,7 +21,7 @@ class KNNFeatureRecommender(FeatureRecommender):
         X = pd.get_dummies(X, prefix_sep="_dummy_")
         # todas as novas colunas após o encoding
         X_encoder = list(X)
-        neigh = KNeighborsClassifier(n_neighbors=FeatureRecommender.NEIGHBORS)
+        neigh = KNeighborsClassifier(n_neighbors=self.neighbors)
         neigh.fit(X.values, y.values)
         test = []
         # X é codificado como One-Hot encoding, entao todas as colunas sao 0 ou 1
@@ -37,10 +37,13 @@ class KNNFeatureRecommender(FeatureRecommender):
                     test.append(0)
             else:
                 test.append(0)
-        return neigh.predict([test])[0]
+        pred = neigh.predict([test])[0]
+        prob = max(neigh.predict_proba([test])[0])
+        return [(pred,prob)]
 
     def recomendation(self, votes):
-        c = Counter(votes)
+        l = [vote[0] for candidates in votes for vote in candidates]
+        c = Counter(l)
         resp = c.most_common(1)[0][0]
         confidence = c.most_common(1)[0][1] / float(len(votes))
         return (resp, confidence)
