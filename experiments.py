@@ -20,7 +20,8 @@ kf = KFold(n_splits=5)
 neighbors = [3, 5, 7]
 features = list(data.columns)
 
-with open('results.txt', 'w') as f:
+with open('results.txt' + time.strftime('%a, %d %b %Y %H:%M:%S '), 'w') as f:
+    start = time.time()
     for feature in features:
 
         f.write('FEATURE = %s\n\n' % feature)
@@ -38,10 +39,8 @@ with open('results.txt', 'w') as f:
                 knn_pred = []
                 rank_true_label = []
                 rank_pred = []
-                start = time.time()
 
                 for idx in test_index:
-                    #TODO ver como posso guardar uma lista de dicts contendo as preferencias
                     preferences = data.iloc[idx].to_dict()
                     true_value = preferences[feature]
                     del preferences[feature]
@@ -49,7 +48,7 @@ with open('results.txt', 'w') as f:
                     f.write("PREFERÊNCIAS: ")
                     f.write(json.dumps(preferences))
                     f.write("\n")
-                    
+
                     knn_recomendation = knn_recommender.recommend(feature, preferences)
                     rank_recomendation = rank_recommender.recommend(feature, preferences)
                     if knn_recomendation:
@@ -58,8 +57,6 @@ with open('results.txt', 'w') as f:
                     if rank_recomendation:
                         rank_true_label.append(true_value)
                         rank_pred.append(rank_recomendation)
-                end = time.time()
-                elapsed = end - start
 
                 f.write('%s \t %s \t %s \t %s\n' % ("MODELO", "ACURACIA", "PRECISAO", "RECALL"))
                 print('%s \t %s \t %s \t %s' % ("MODELO", "ACURACIA", "PRECISAO", "RECALL"))
@@ -92,15 +89,15 @@ with open('results.txt', 'w') as f:
                 f.write("\n")
                 f.write('PRED_LABEL : ' + ', '.join([str(elem) for elem in rank_pred_label]))
                 f.write("\n\n")
-                f.write('%s %f\n' % ("TEMPO: ", elapsed))
-                f.write("\n\n")
 
                 print('%s \t %d \t %f \t %f \t %f\n' % ('RANK', neighbor, rank_accuracy, rank_precision, rank_recall))
                 print('TRUE_LABEL : ' + ', '.join([str(elem) for elem in rank_true_label]))
                 print("\n")
                 print('PRED_LABEL : ' + ', '.join([str(elem) for elem in rank_pred_label]))
                 print("\n\n")
-                print('%s %f\n' % ("TEMPO: ", elapsed))
-                print("\n\n")
             f.write("####################################\n")
             print("######################################")
+    end = time.time()
+    elapsed = end - start
+    f.write('%s %f\n' % ("TEMPO TOTAL: ", elapsed))
+    f.write("\n\n")
