@@ -15,8 +15,8 @@ class PreferenceRelation():
 
 class RankFeatureRecommender(FeatureRecommender):
 
-    def __init__(self, data, weights=[]):
-        super(RankFeatureRecommender, self).__init__(data,weights)
+    def __init__(self, data, weights=[], neighbors= FeatureRecommender.NEIGHBORS):
+        super(RankFeatureRecommender, self).__init__(data, weights, neighbors)
 
     def recommender(self, data, feature, preferences, weights):
         # as classes do meu problema são os valores da feature que quero recomendar
@@ -26,18 +26,21 @@ class RankFeatureRecommender(FeatureRecommender):
         preferences_relations = []
         for c1, c2 in classes_pairs:
             # só me importa os dados que pertença a uma das classes
-            #TODO tenho que verificar como adicionar a galera que não pertence
+            # TODO tenho que verificar como adicionar a galera que não pertence
             preferences = pd.concat([data[data[feature] == c1], data[data[feature] == c2]])
             X = preferences.loc[:, preferences.columns != feature]
             y = preferences.loc[:, preferences.columns == feature]
-            if len(X) >= FeatureRecommender.NEIGHBORS:
-                neigh = KNeighborsClassifier(n_neighbors=FeatureRecommender.NEIGHBORS)
+            if len(X) >= self.neighbors:
+                neigh = KNeighborsClassifier(n_neighbors=self.neighbors)
                 X_ = X.astype(str)
                 # One-hot encoding
                 X_ = pd.get_dummies(X_, prefix_sep='_dummy_')
                 # todas as novas colunas após o encoding
                 X_encoder = list(X_)
-                neigh.fit(X_.values, y.values.ravel())
+                y = y.values.ravel()
+                if isinstance(y[0], float):
+                    y = [str(y_) for y_ in y]
+                neigh.fit(X_.values, y)
                 # guardo o modelo gerado para esse par
                 preferences_relations.append(PreferenceRelation((c1, c2), neigh, X_encoder))
         # inicializo os 'votos' zerados
@@ -54,17 +57,36 @@ class RankFeatureRecommender(FeatureRecommender):
                         voting_classes[class_] += prob_sorted_by_classes[0]
                     else:
                         voting_classes[class_] += prob_sorted_by_classes[1]
+        #nessa partição só existe um valor possível, então é 100% de certeza
+        if len(classes_pairs) <= 0:
+            voting_classes[[*voting_classes.keys()][0]] = 1
         return self.rank(voting_classes)
 
     def recomendation(self, votes):
         # BordaCount
+        # import pdb
+        # pdb.set_trace()
         classes_set = set([t[0] for rank in votes for t in rank])
         classes = dict.fromkeys(classes_set, 0)
+        already_voted = []
         for rank in votes:
             weight = len(rank) - 1
             for vote in rank:
-                classes[vote[0]] += np.power(2, weight)
+                def y(actual_vote, votes):
+                    return [vote for vote in votes if vote[1] == actual_vote[1]]
+                if vote not in already_voted:
+                    draw_votes = y(vote, rank)
+                    for candidate, percentage in draw_votes:
+                        classes[candidate] += np.power(2, weight) * percentage
+                    already_voted +=[(k, v) for (k, v) in draw_votes]
+                # import pdb
+                # pdb.set_trace()
+                # try:
+                # except:
+                #     draw_votes = [elem[0] for elem in draw_votes]
+                # already_voted += [(k, v) for (k, v) in rank if (k, v) not in draw_votes[0]]
                 weight -= 1
+            already_voted = []
         ordered_preferences = self.rank(classes)
         resp = ordered_preferences[0][0]
         confidence = ordered_preferences[0][1] / float(len(votes))
