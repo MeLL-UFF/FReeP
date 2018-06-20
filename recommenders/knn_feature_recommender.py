@@ -1,13 +1,13 @@
 # source activate py35
 import pandas as pd
 from sklearn.neighbors import KNeighborsClassifier
-from feature_recommender import FeatureRecommender
+from recommenders.feature_recommender import FeatureRecommender
 from collections import Counter
 
 
 class KNNFeatureRecommender(FeatureRecommender):
-    def __init__(self, data, weights=[], neighbors= FeatureRecommender.NEIGHBORS):
-        super(KNNFeatureRecommender, self).__init__(data, weights, neighbors)
+    def __init__(self, data, partitioner, weights=[], neighbors= FeatureRecommender.NEIGHBORS):
+        super(KNNFeatureRecommender, self).__init__(data, partitioner, weights, neighbors)
 
     def recommender(self, data, feature, preferences, weights):
         # X = todas as colunas menos a última, Y= última
@@ -47,3 +47,10 @@ class KNNFeatureRecommender(FeatureRecommender):
         resp = c.most_common(1)[0][0]
         confidence = c.most_common(1)[0][1] / float(len(votes))
         return (resp, confidence)
+
+    def process_vote(self, votes):
+        if self.label_encoder is None:
+            return votes
+        else:
+            decode = self.label_encoder.inverse_transform(votes[0][0])
+            return [(decode,votes[0][1])]

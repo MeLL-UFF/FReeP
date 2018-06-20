@@ -18,6 +18,7 @@ class Partitioner(ABC):
         return self.data[vertical_partition], []
 
     def horizontal_partition(self, partition, preference_set, weights):
+        partition_weights = []
         for preference in preference_set:
                 # filtro os registros que possuem os mesmos valores das preferências
                 if len(weights) > 0:
@@ -27,7 +28,7 @@ class Partitioner(ABC):
         return partition, partition_weights
 
     @abstractmethod
-    def partition(self, lst, data):
+    def partition(self, lst):
         """Primitive operation. You HAVE TO override me, I'm a placeholder."""
         """Essa funcao deve retornar as combinacoes de preferencias"""
         pass

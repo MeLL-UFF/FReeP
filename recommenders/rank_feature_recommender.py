@@ -2,7 +2,7 @@ import pandas as pd
 import itertools
 from sklearn.neighbors import KNeighborsClassifier
 import numbers
-from feature_recommender import FeatureRecommender
+from recommenders.feature_recommender import FeatureRecommender
 import numpy as np
 
 
@@ -15,8 +15,8 @@ class PreferenceRelation():
 
 class RankFeatureRecommender(FeatureRecommender):
 
-    def __init__(self, data, weights=[], neighbors= FeatureRecommender.NEIGHBORS):
-        super(RankFeatureRecommender, self).__init__(data, weights, neighbors)
+    def __init__(self, data, partitioner, weights=[], neighbors= FeatureRecommender.NEIGHBORS):
+        super(RankFeatureRecommender, self).__init__(data, partitioner, weights, neighbors)
 
     def recommender(self, data, feature, preferences, weights):
         # as classes do meu problema são os valores da feature que quero recomendar
@@ -92,6 +92,23 @@ class RankFeatureRecommender(FeatureRecommender):
         confidence = ordered_preferences[0][1] / float(len(votes))
         return (resp, confidence)
 
+    def process_vote(self, votes):
+        if self.label_encoder is None:
+            return votes
+        else:
+            try:
+                #só um no rank
+                decode = self.label_encoder.inverse_transform(votes[0][0])
+                return [(decode,votes[0][1])]
+            except:
+                ##rank com mais de um elemento
+                rank_ = []
+                for candidate in votes:
+                    candidate_decoded = self.label_encoder.inverse_transform(candidate[0])
+                    rank_.append((candidate_decoded, candidate[1]))
+                self.label_encoder = None
+                return rank_
+            
     def rank(self, votes):
         # ordeno o dicionario pelos valores, trazendo o rank
         rank = sorted(votes.items(), key=lambda x: x[1], reverse=True)

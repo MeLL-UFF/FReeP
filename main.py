@@ -1,8 +1,9 @@
-import pandas as pd
-from custom_knn_feature_recommender import CustomKNNFeatureRecommender
-from knn_feature_recommender import KNNFeatureRecommender
-from rank_feature_recommender import RankFeatureRecommender
 import numpy as np
+import pandas as pd
+from recommenders.custom_knn_feature_recommender import CustomKNNFeatureRecommender
+from recommenders.knn_feature_recommender import KNNFeatureRecommender
+from recommenders.rank_feature_recommender import RankFeatureRecommender
+from partitioners.full_partitioner import FullPartitioner
 
 
 # lendo dados originais, preciso desse float precision pra ele não arredondar
@@ -20,8 +21,10 @@ preferences = {
     'prob2': 1588.4588012017
 }
 
+partitioner = FullPartitioner(data, preferences)
+
 # print("Preferências: ", preferences)
-# recommender = KNNFeatureRecommender(data)
+# recommender = KNNFeatureRecommender(data, partitioner)
 # recomendation = recommender.recommend(feature, preferences)
 # print("Recomendação por KNN para", feature, 'é', recomendation)
 #
@@ -34,7 +37,7 @@ preferences = {
 #
 # print("\n")
 
-recommender = RankFeatureRecommender(data)
+recommender = RankFeatureRecommender(data, partitioner)
 recomendation = recommender.recommend(feature, preferences)
 print("Recomendação por RANK para", feature, 'é', recomendation)
 
@@ -50,6 +53,8 @@ preferences = {
     'prob2': 1588.4588012017
 }
 
+partitioner = FullPartitioner(data, preferences)
+
 # print("Preferências: ", preferences)
 # recommender = KNNFeatureRecommender(data)
 # recomendation = recommender.recommend(feature, preferences)
@@ -65,6 +70,6 @@ preferences = {
 # print("\n")
 
 #
-recommender = RankFeatureRecommender(data)
+recommender = RankFeatureRecommender(data, partitioner)
 recomendation = recommender.recommend(feature, preferences)
 print("Recomendação por RANK para", feature, 'é', recomendation)

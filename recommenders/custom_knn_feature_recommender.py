@@ -1,14 +1,14 @@
 # source activate py35
 import pandas as pd
-from feature_recommender import FeatureRecommender
-from custom_knn import CustomKNN
+from recommenders.feature_recommender import FeatureRecommender
+from classifiers.custom_knn import CustomKNN
 from collections import Counter
 
 
 class CustomKNNFeatureRecommender(FeatureRecommender):
 
-    def __init__(self, data, weights=[]):
-        super(CustomKNNFeatureRecommender, self).__init__(data, weights)
+    def __init__(self, data, partitioner, weights=[]):
+        super(CustomKNNFeatureRecommender, self).__init__(data, partitioner, weights)
 
     def recommender(self, data, feature, preferences, weights=[]):
         # X = todas as colunas menos a última, Y= última
@@ -43,3 +43,10 @@ class CustomKNNFeatureRecommender(FeatureRecommender):
         resp = c.most_common(1)[0][0]
         confidence = c.most_common(1)[0][1] / float(len(votes))
         return (resp, confidence)
+
+    def process_vote(self, votes):
+        if self.label_encoder is None:
+            return votes
+        else:
+            decode = self.label_encoder.inverse_transform(votes[0][0])
+            return [(decode,votes[0][1])]
