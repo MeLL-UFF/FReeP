@@ -4,6 +4,7 @@ from recommenders.custom_knn_feature_recommender import CustomKNNFeatureRecommen
 from recommenders.knn_feature_recommender import KNNFeatureRecommender
 from recommenders.rank_feature_recommender import RankFeatureRecommender
 from partitioners.full_partitioner import FullPartitioner
+from partitioners.percentage_partitioner import PercentagePartitioner
 
 
 # lendo dados originais, preciso desse float precision pra ele não arredondar
@@ -21,7 +22,8 @@ preferences = {
     'prob2': 1588.4588012017
 }
 
-partitioner = FullPartitioner(data, preferences)
+# partitioner = FullPartitioner(data,feature, preferences)
+partitioner = PercentagePartitioner(data,feature, preferences)
 
 # print("Preferências: ", preferences)
 # recommender = KNNFeatureRecommender(data, partitioner)
@@ -53,7 +55,7 @@ preferences = {
     'prob2': 1588.4588012017
 }
 
-partitioner = FullPartitioner(data, preferences)
+partitioner = FullPartitioner(data,feature, preferences)
 
 # print("Preferências: ", preferences)
 # recommender = KNNFeatureRecommender(data)

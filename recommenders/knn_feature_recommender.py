@@ -6,8 +6,8 @@ from collections import Counter
 
 
 class KNNFeatureRecommender(FeatureRecommender):
-    def __init__(self, data, partitioner, weights=[], neighbors= FeatureRecommender.NEIGHBORS):
-        super(KNNFeatureRecommender, self).__init__(data, partitioner, weights, neighbors)
+    def __init__(self, X, y, partitioner, weights=[], neighbors= FeatureRecommender.NEIGHBORS):
+        super(KNNFeatureRecommender, self).__init__(X, y, partitioner, weights, neighbors)
 
     def recommender(self, data, feature, preferences, weights):
         # X = todas as colunas menos a última, Y= última

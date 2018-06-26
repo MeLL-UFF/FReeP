@@ -1,34 +1,33 @@
 from functools import reduce
 from abc import ABC, abstractmethod
 
-class Partitioner(ABC):
-    def __init__(self,data, preferences):
-        self.data = data
-        self.preferences = preferences
-    
-    def vertical_partition(self, preference_set, not_preference_set, feature):
-        vertical_partition = preference_set
-        # adiciono as colunas que não fazem parte nem das preferencias nem é feature
-        if not_preference_set:
-            vertical_partition.extend(not_preference_set)
-        # adiciono a coluna que quero recomendar na ultima coluna
-        vertical_partition.append(feature)
-        # todos os registros apenas com as features deste conjunto
-        # array de pesos (vazio inicialmente)
-        return self.data[vertical_partition], []
 
-    def horizontal_partition(self, partition, preference_set, weights):
-        partition_weights = []
-        for preference in preference_set:
-                # filtro os registros que possuem os mesmos valores das preferências
-                if len(weights) > 0:
-                    # indices dos pesos associados a essa partição
-                    partition_weights = partition[partition[preference] == self.preferences[preference]].index
-                partition = partition[partition[preference] == self.preferences[preference]]
-        return partition, partition_weights
+class Partitioner(ABC):
+
+    def vertical_partition(self, X, preferences_columns):
+        # uma gambiarra pra passar mais de um argumento pro escopo da list comprehension
+        def y(columns, preferences_columns):
+            return [column for column in columns if column.split('_')[0] in preferences_columns]
+        columns = y(X.columns, preferences_columns)
+        # todos os registros apenas com as features deste conjunto e array de pesos (vazio inicialmente)
+        return X[columns]
+
+    def horizontal_partition(self, X, y, current_preferences, preferences, weights=[]): 
+        X_ = X.copy()
+        y_ = y.copy()
+        weights_ = weights.copy()
+        for preference in current_preferences:
+            index = X[X[preference] == preferences[preference][0]].index
+            # filtro os registros que possuem os mesmos valores das preferências
+            # indices dos pesos associados a essa partição
+            if len(weights) > 0:
+                weights_ = weights.loc[index]
+            X_ = X.loc[index]
+            y_ = y.loc[index]
+        return X_, y_, weights_
 
     @abstractmethod
-    def partition(self, lst):
+    def partition(self, X, preferences_columns):
         """Primitive operation. You HAVE TO override me, I'm a placeholder."""
         """Essa funcao deve retornar as combinacoes de preferencias"""
         pass
