@@ -11,6 +11,8 @@ class EncodingProcessor():
         if not isinstance(y.values[0], Number):
             self.y_encoder = LabelEncoder()
             y = self.y_encoder.fit_transform(y.values)
+        else:
+            self.y_encoder = None
         X = pd.get_dummies(X)
         self.X_encoder = list(X)
         preferences = pd.get_dummies(preferences)
@@ -23,13 +25,22 @@ class EncodingProcessor():
     def encode_preference(self, preferences, encoded_preferences, current_preferences):
         resp = []
         for current_preference in current_preferences:
-            preference = current_preference + '_' + preferences[current_preference][0]
-            if preference  in self.preferences_encoder:
-                if encoded_preferences[preference][0] == 1:
-                    resp.append(preference)
+            #a não ser que já seja uma preferencia numerica
+            if not isinstance(preferences[current_preference][0], Number):
+                #verifica se essa feature codificada esta entre as preferencias
+                preference = current_preference + '_' + \
+                    preferences[current_preference][0]
+                if preference in self.preferences_encoder:
+                    if encoded_preferences[preference][0] == 1:
+                        resp.append(preference)
+                else:
+                    resp.append(current_preference)
             else:
                 resp.append(current_preference)
         return resp
-        
-    def decode(self, X, y):
-        pass
+
+    def decode_y(self, y):
+        if self.y_encoder is None:
+            return y
+        else:
+            return self.y_encoder.inverse_transform(y)

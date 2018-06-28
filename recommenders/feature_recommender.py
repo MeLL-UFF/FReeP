@@ -20,31 +20,28 @@ class FeatureRecommender(ABC):
     # Feature é uma coluna de um dataFrame
     # Preferences é um dictionary
     def recommend(self, feature, preferences):
-        preprocessor = EncodingProcessor()
-        X_, y_, encoded_preferences = preprocessor.encode(
+        self.preprocessor = EncodingProcessor()
+        X_, y_, encoded_preferences = self.preprocessor.encode(
             self.X, self.y, preferences)
         preferences_partitions = self.partitioner.partition(
             X_, preferences.keys())
         votes = []
         for current_preferences in preferences_partitions:
-            X_ = self.partitioner.vertical_partition(X_, current_preferences)
-            encoded_current_preferences = preprocessor.encode_preference(preferences, encoded_preferences,
-                                                                         current_preferences)
+            X_partition = self.partitioner.vertical_partition(
+                X_, current_preferences)
+            y_partition = y_.copy()
+            encoded_current_preferences = self.preprocessor.encode_preference(preferences, encoded_preferences,
+                                                                              current_preferences)
             # current_preferences é um array
             # encoded_preferences é um dataframe
             # preferences é um dataframe
-            X_, y_, weights_ = self.partitioner.horizontal_partition(X_, y_, encoded_current_preferences,
-                                                                     encoded_preferences, self.weights)
+            X_partition, y_partition, weights_ = self.partitioner.horizontal_partition(X_partition, y_partition, encoded_current_preferences,
+                                                                                       encoded_preferences, self.weights)
 
-            # partition, partition_weights = self.partitioner.vertical_partition(current_preferences.copy(), not_current_preferences, feature)
-            # partition, partition_weights = self.partitioner.horizontal_partition(partition, current_preferences.copy(), self.weights)
             # pode ser que não tenha nenhuma proveniencia que obdeca os filtros de dados
-            if len(partition) >= self.neighbors:
-                partition[feature] = self.categorical_transformation(
-                    partition[feature])
-                partition_weights = self.weights_selection(partition_weights)
+            if len(X_partition) >= self.neighbors:
                 vote = self.recommender(
-                    partition, feature, preferences, partition_weights)
+                    X_partition, y_partition, feature, encoded_preferences, weights_)
                 processed_vote = self.process_vote(vote)
                 votes.append(processed_vote)
         if votes:
@@ -52,8 +49,13 @@ class FeatureRecommender(ABC):
         else:
             return None
 
+    # @abstractmethod
+    # def recommender(self, data, feature, preferences, weights):
+    #     """Primitive operation. You HAVE TO override me, I'm a placeholder."""
+    #     pass
+
     @abstractmethod
-    def recommender(self, data, feature, preferences, weights):
+    def recommender(self, X, y, feature, preferences, weights):
         """Primitive operation. You HAVE TO override me, I'm a placeholder."""
         pass
 
