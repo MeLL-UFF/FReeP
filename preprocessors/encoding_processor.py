@@ -10,7 +10,7 @@ class EncodingProcessor():
         self.columns_names = list(X)
         if not isinstance(y.values[0], Number):
             self.y_encoder = LabelEncoder()
-            y = self.y_encoder.fit_transform(y.values)
+            y = pd.Series(self.y_encoder.fit_transform(y.values))
         else:
             self.y_encoder = None
         X = pd.get_dummies(X)

@@ -7,12 +7,12 @@ class Partitioner(ABC):
     def vertical_partition(self, X, preferences_columns):
         # uma gambiarra pra passar mais de um argumento pro escopo da list comprehension
         def y(columns, preferences_columns):
-            return [column for column in columns if column.split('_')[0] in preferences_columns]
+            return [column for column in columns if column.split('_')[0] in preferences_columns or column in preferences_columns]
         columns = y(X.columns, preferences_columns)
         # todos os registros apenas com as features deste conjunto e array de pesos (vazio inicialmente)
         return X[columns]
 
-    def horizontal_partition(self, X, y, current_preferences, preferences, weights=[]): 
+    def horizontal_partition(self, X, y, current_preferences, preferences, weights=[]):
         X_ = X.copy()
         y_ = y.copy()
         weights_ = weights.copy()
