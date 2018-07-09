@@ -49,6 +49,16 @@ class FeatureRecommender(ABC):
         else:
             return None
 
+    def to_predict_instance(self, X, preferences):
+        instance = []
+        # X é codificado como One-Hot encoding, entao todas as colunas sao numericas
+        for param in X:
+            if param in preferences:
+                instance.append(preferences[param][0])
+            else:
+                instance.append(0)
+        return instance
+
     # @abstractmethod
     # def recommender(self, data, feature, preferences, weights):
     #     """Primitive operation. You HAVE TO override me, I'm a placeholder."""

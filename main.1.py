@@ -27,14 +27,13 @@ recommender = KNNFeatureRecommender(X, y, FullPartitioner())
 recomendation = recommender.recommend(feature, preferences)
 print("Recomendação por KNN para", feature, 'é', recomendation)
 
-recommender = RankFeatureRecommender(data, partitioner)
+recommender = RankFeatureRecommender(X, y, FullPartitioner())
 recomendation = recommender.recommend(feature, preferences)
 print("Recomendação por RANK para", feature, 'é', recomendation)
 
 print("\n##################################################\n")
-# to fazendo de conta que vou querer recomendar a coluna 'num_aligns'
+# # to fazendo de conta que vou querer recomendar a coluna 'num_aligns'
 feature = 'model2'
-# minhas preferências
 preferences = pd.DataFrame([['WAG+G', 1588.4588012017, 10.0, 1588.4588012017]],
                            columns=['model1', 'prob1', 'num_aligns', 'prob2'])
 
@@ -46,23 +45,6 @@ recommender = KNNFeatureRecommender(X, y, FullPartitioner())
 recomendation = recommender.recommend(feature, preferences)
 print("Recomendação por KNN para", feature, 'é', recomendation)
 
-# partitioner = FullPartitioner(data,feature, preferences)
-
-# # print("Preferências: ", preferences)
-# # recommender = KNNFeatureRecommender(data)
-# # recomendation = recommender.recommend(feature, preferences)
-# # print("Recomendação por KNN para", feature, 'é', recomendation)
-# #
-# # print("\n")
-# #
-# # fake_weights = np.random.randint(1,10,data.shape[0])
-# # recommender = CustomKNNFeatureRecommender(data, fake_weights)
-# # recomendation = recommender.recommend(feature, preferences)
-# # print("Recomendação por Custom-KNN para", feature, 'é', recomendation)
-# #
-# # print("\n")
-
-# #
-# recommender = RankFeatureRecommender(data, partitioner)
-# recomendation = recommender.recommend(feature, preferences)
-# print("Recomendação por RANK para", feature, 'é', recomendation)
+recommender = RankFeatureRecommender(X, y, FullPartitioner())
+recomendation = recommender.recommend(feature, preferences)
+print("Recomendação por RANK para", feature, 'é', recomendation)

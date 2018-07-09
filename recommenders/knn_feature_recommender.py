@@ -14,13 +14,7 @@ class KNNFeatureRecommender(FeatureRecommender):
         """ X, y e preferences one-hot encoding"""
         neigh = KNeighborsClassifier(n_neighbors=self.neighbors)
         neigh.fit(X.values, y.values)
-        instance = []
-        # X é codificado como One-Hot encoding, entao todas as colunas sao 0 ou 1
-        for param in X:
-            if param in preferences:
-                instance.append(preferences[param][0])
-            else:
-                instance.append(0)
+        instance = super(KNNFeatureRecommender, self).to_predict_instance(X, preferences)
         pred = neigh.predict([instance])[0]
         prob = max(neigh.predict_proba([instance])[0])
         return [(pred, prob)]
