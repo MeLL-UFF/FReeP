@@ -24,18 +24,16 @@ class FeatureRecommender(ABC):
         X_, y_, encoded_preferences = self.preprocessor.encode(
             self.X, self.y, preferences)
         preferences_partitions = self.partitioner.partition(
-            X_, preferences.keys())
+            X_, y_, encoded_preferences.columns.values)
         votes = []
         for current_preferences in preferences_partitions:
             X_partition = self.partitioner.vertical_partition(
                 X_, current_preferences)
             y_partition = y_.copy()
-            encoded_current_preferences = self.preprocessor.encode_preference(preferences, encoded_preferences,
-                                                                              current_preferences)
             # current_preferences é um array
             # encoded_preferences é um dataframe
             # preferences é um dataframe
-            X_partition, y_partition, weights_ = self.partitioner.horizontal_partition(X_partition, y_partition, encoded_current_preferences,
+            X_partition, y_partition, weights_ = self.partitioner.horizontal_partition(X_partition, y_partition, current_preferences,
                                                                                        encoded_preferences, self.weights)
 
             # pode ser que não tenha nenhuma proveniencia que obdeca os filtros de dados

@@ -1,16 +1,11 @@
 from functools import reduce
 from abc import ABC, abstractmethod
-
+from functools import reduce
 
 class Partitioner(ABC):
 
     def vertical_partition(self, X, preferences_columns):
-        # uma gambiarra pra passar mais de um argumento pro escopo da list comprehension
-        def y(columns, preferences_columns):
-            return [column for column in columns if column.split('_')[0] in preferences_columns or column in preferences_columns]
-        columns = y(X.columns, preferences_columns)
-        # todos os registros apenas com as features deste conjunto e array de pesos (vazio inicialmente)
-        return X[columns]
+        return X[preferences_columns]
 
     def horizontal_partition(self, X, y, current_preferences, preferences, weights=[]):
         X_ = X.copy()
@@ -27,7 +22,12 @@ class Partitioner(ABC):
         return X_, y_, weights_
 
     @abstractmethod
-    def partition(self, X, preferences_columns):
+    def partition(self, X, y, preferences_columns):
         """Primitive operation. You HAVE TO override me, I'm a placeholder."""
         """Essa funcao deve retornar as combinacoes de preferencias"""
         pass
+
+    def powerset(self, columns):
+        """ Conjunto das partes de todas as colunas das preferências, exceto o vazio"""
+        return reduce(lambda result, x: result + [subset + [x] for subset in result],
+                      columns, [[]])[1:]
