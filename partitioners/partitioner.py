@@ -29,5 +29,7 @@ class Partitioner(ABC):
 
     def powerset(self, columns):
         """ Conjunto das partes de todas as colunas das preferências, exceto o vazio"""
-        return reduce(lambda result, x: result + [subset + [x] for subset in result],
-                      columns, [[]])[1:]
+        sets =  reduce(lambda result, x: result + [subset + [x] for subset in result],
+                      columns, [[]])
+        #apenas os conjuntos com pelo menos dois elementos
+        return [set_ for set_ in sets if len(set_) > 1]

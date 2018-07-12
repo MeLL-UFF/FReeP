@@ -1,5 +1,4 @@
 from partitioners.partitioner import Partitioner
-from sklearn.feature_selection import SelectPercentile
 import numpy as np
 
 
