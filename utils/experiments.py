@@ -2,9 +2,9 @@ import time
 import json
 import random
 import pandas as pd
-from custom_knn_feature_recommender import CustomKNNFeatureRecommender
-from knn_feature_recommender import KNNFeatureRecommender
-from rank_feature_recommender import RankFeatureRecommender
+from recommenders.custom_knn_feature_recommender import CustomKNNFeatureRecommender
+from recommenders.knn_feature_recommender import KNNFeatureRecommender
+from recommenders.rank_feature_recommender import RankFeatureRecommender
 import numpy as np
 from sklearn.model_selection import KFold
 from sklearn.metrics import accuracy_score
