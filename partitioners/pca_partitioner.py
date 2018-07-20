@@ -1,6 +1,8 @@
 from partitioners.partitioner import Partitioner
 from sklearn.decomposition import PCA
 import numpy as np
+from preprocessors.encoding_processor import EncodingProcessor
+from utils.preference_processor import PreferenceProcessor
 
 
 class PCAPartitioner(Partitioner):
@@ -8,17 +10,29 @@ class PCAPartitioner(Partitioner):
         self.percentile = percentile
         super(PCAPartitioner, self).__init__()
 
-    def partition(self, X, y, preferences_columns):
+    def partition(self, X, y, preferences_columns, preferences_parameters):
         combinations = super(PCAPartitioner, self).powerset(
             preferences_columns)
         maximum_partitions = int(
-            len(X[preferences_columns].columns) * (self.percentile / 100.0))
+            len(X[preferences_parameters].columns) * (self.percentile / 100.0))
         partitions = {}
         pca_original = PCA(n_components=2)
-        pca_original.fit(X)
+
+        self.preprocessor = EncodingProcessor()
+        X_, y_ = self.preprocessor.encode(
+            X, y)
+
+        pca_original.fit(X_)
         original_singular_values = pca_original.singular_values_
         for combination in combinations:
-            partition = X[combination]
+            partition = X
+            for item in combination:
+                partition = X[eval(PreferenceProcessor.preference_for_eval(
+                    item, X.columns.values))]
+            # partition = X[eval(PreferenceProcessor.preference_for_eval(
+            #     combination, X.columns.values))]
+            partition, y__ = self.preprocessor.encode(
+                partition, y)
             pca_partition = PCA(n_components=2)
             pca_partition.fit(partition)
             partition_singular_values = pca_partition.singular_values_

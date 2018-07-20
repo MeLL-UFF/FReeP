@@ -24,23 +24,56 @@ data = pd.read_csv('data.csv', float_precision='round_trip')
 data = data[~data['erro']].copy().drop('erro', axis=1).reset_index(drop=True)
 
 
-feature = 'num_aligns'
+# feature = 'num_aligns'
 
-# preferences =[
-#     Preference(Parameter('model1'),'=',Value('WAG+G')),
-#     Preference(Parameter('prob1'),'=',Value(1588.4588012017)),
-#     Preference(Parameter('model2'),'=',Value('WAG+G')),
-# ]
+# preferences = [
+#     "( model1 == 'WAG+G' ) | ( model1 == 'WAG+I+F' )",
+#     "prob1 >= 1500"
+#     ]
+# y = data[feature]
+# X = data.drop(feature, axis=1)
 
+# print("Preferências: ", preferences)
+# recommender = ClassifierFeatureRecommender(X, y, FullPartitioner(), classifier=KNeighborsClassifier(n_neighbors=3))
+# recomendation = recommender.recommend(feature, preferences)
+# print("Recomendação por KNN para", feature, 'é', recomendation)
+
+# recommender = ClassifierFeatureRecommender(X, y, FullPartitioner(), classifier=SVC(probability=True))
+# recomendation = recommender.recommend(feature, preferences)
+# print("Recomendação por SVM para", feature, 'é', recomendation)
+
+# print("\n####################################\n")
+
+feature = 'model2'
 preferences = [
     "( model1 == 'WAG+G' ) | ( model1 == 'WAG+I+F' )",
-    "prob1 >= 1500"
+    "prob1 >= 1500",
+    "length > 350"
     ]
 y = data[feature]
 X = data.drop(feature, axis=1)
 
 print("Preferências: ", preferences)
-recommender = ClassifierFeatureRecommender(X, y, FullPartitioner(), classifier=KNeighborsClassifier(n_neighbors=3))
+recommender = ClassifierFeatureRecommender(X, y, PCAPartitioner(), classifier=KNeighborsClassifier(n_neighbors=3))
 recomendation = recommender.recommend(feature, preferences)
 print("Recomendação por KNN para", feature, 'é', recomendation)
 
+recommender = ClassifierFeatureRecommender(X, y, PCAPartitioner(), classifier=SVC(probability=True))
+recomendation = recommender.recommend(feature, preferences)
+print("Recomendação por SVM para", feature, 'é', recomendation)
+
+print("\n####################################\n")
+
+feature = 'prob1'
+preferences = [
+    "( model1 == 'WAG+G' ) | ( model1 == 'WAG+I+F' )",
+    "num_aligns == 10"
+    ]
+
+y = data[feature]
+X = data.drop(feature, axis=1)
+
+print("Preferências: ", preferences)
+recommender = RegressorFeatureRecommender(X, y, PCAPartitioner())
+recomendation = recommender.recommend(feature, preferences)
+print("Recomendação por KNR para", feature, 'é', recomendation)

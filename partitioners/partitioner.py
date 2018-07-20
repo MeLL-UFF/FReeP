@@ -9,7 +9,7 @@ class Partitioner(ABC):
         current_preferences_parameters = PreferenceProcessor.parameters_in_preferences(
             current_preferences, X.columns.values)
         diff = list(set(X.columns.values) - set(preferences_parameters))
-        current_columns =  current_preferences_parameters + diff
+        current_columns = current_preferences_parameters + diff
         return X[X.columns.intersection(current_columns)]
 
     def horizontal_partition(self, X, y, current_preferences, weights=[]):
@@ -27,7 +27,7 @@ class Partitioner(ABC):
         return X_, y_, weights_
 
     @abstractmethod
-    def partition(self, X, y, preferences_columns):
+    def partition(self, X, y, preferences_columns, preferences_parameters):
         """Primitive operation. You HAVE TO override me, I'm a placeholder."""
         """Essa funcao deve retornar as combinacoes de preferencias"""
         pass

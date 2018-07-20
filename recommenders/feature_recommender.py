@@ -26,7 +26,7 @@ class FeatureRecommender(ABC):
         preferences_parameters = PreferenceProcessor.parameters_in_preferences(
             preferences, self.X.columns.values)
         preferences_partitions = self.partitioner.partition(
-            self.X, self.y, preferences)
+            self.X, self.y, preferences, preferences_parameters)
         votes = []
         for current_preferences in preferences_partitions:
             # vertical partition
@@ -35,14 +35,14 @@ class FeatureRecommender(ABC):
             # horizontal parition
             X_partition, y_partition, weights_ = self.partitioner.horizontal_partition(
                 X_partition, self.y, current_preferences, self.weights)
-            # one-hot encoding
-            self.filter_X = X_partition.copy()
-            self.filter_y = y_partition.copy()
-            self.preprocessor = EncodingProcessor()
-            X_partition, y_partition = self.preprocessor.encode(
-                X_partition, y_partition)
             # pode ser que não tenha nenhuma proveniencia que obdeca os filtros de dados
             if len(X_partition) >= self.neighbors:
+                self.filter_X = X_partition.copy()
+                self.filter_y = y_partition.copy()
+                self.preprocessor = EncodingProcessor()
+                # one-hot encoding
+                X_partition, y_partition = self.preprocessor.encode(
+                    X_partition, y_partition)
                 vote = self.recommender(
                     X_partition, y_partition, feature, current_preferences, weights_)
                 processed_vote = self.process_vote(vote)
