@@ -34,8 +34,9 @@ class ClassifierFeatureRecommender(FeatureRecommender):
 
     def classifier_prediction(self, X, y, preferences):
         self.classifier.fit(X.values, y.values)
-        instance = super(ClassifierFeatureRecommender,
+        instances = super(ClassifierFeatureRecommender,
                          self).to_predict_instance(X, preferences)
+        #TODO tratar a predição de varias instancias
         pred = self.classifier.predict([instance])[0]
         prob = max(self.classifier.predict_proba([instance])[0])
         return [(pred, prob)]

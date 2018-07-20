@@ -5,6 +5,9 @@ from sklearn.preprocessing import LabelEncoder
 from numbers import Number
 import numpy as np
 from preprocessors.encoding_processor import EncodingProcessor
+from utils.preference_processor import PreferenceProcessor
+import itertools
+from sklearn.preprocessing.imputation import Imputer
 
 
 class FeatureRecommender(ABC):
@@ -20,26 +23,28 @@ class FeatureRecommender(ABC):
     # Feature é uma coluna de um dataFrame
     # Preferences é um dictionary
     def recommend(self, feature, preferences):
-        self.preprocessor = EncodingProcessor()
-        X_, y_, encoded_preferences = self.preprocessor.encode(
-            self.X, self.y, preferences)
+        preferences_parameters = PreferenceProcessor.parameters_in_preferences(
+            preferences, self.X.columns.values)
         preferences_partitions = self.partitioner.partition(
-            X_, y_, encoded_preferences.columns.values)
+            self.X, self.y, preferences)
         votes = []
         for current_preferences in preferences_partitions:
+            # vertical partition
             X_partition = self.partitioner.vertical_partition(
-                X_, current_preferences)
-            y_partition = y_.copy()
-            # current_preferences é um array
-            # encoded_preferences é um dataframe
-            # preferences é um dataframe
-            X_partition, y_partition, weights_ = self.partitioner.horizontal_partition(X_partition, y_partition, current_preferences,
-                                                                                       encoded_preferences, self.weights)
-
+                self.X, current_preferences, preferences_parameters)
+            # horizontal parition
+            X_partition, y_partition, weights_ = self.partitioner.horizontal_partition(
+                X_partition, self.y, current_preferences, self.weights)
+            # one-hot encoding
+            self.filter_X = X_partition.copy()
+            self.filter_y = y_partition.copy()
+            self.preprocessor = EncodingProcessor()
+            X_partition, y_partition = self.preprocessor.encode(
+                X_partition, y_partition)
             # pode ser que não tenha nenhuma proveniencia que obdeca os filtros de dados
             if len(X_partition) >= self.neighbors:
                 vote = self.recommender(
-                    X_partition, y_partition, feature, encoded_preferences, weights_)
+                    X_partition, y_partition, feature, current_preferences, weights_)
                 processed_vote = self.process_vote(vote)
                 votes.append(processed_vote)
         if votes:
@@ -48,20 +53,45 @@ class FeatureRecommender(ABC):
             return None
 
     def to_predict_instance(self, X, preferences):
-        instance = []
+        preferences_parameters = PreferenceProcessor.parameters_in_preferences(
+            preferences, self.X.columns.values)
+        preferences_parameters_values = []
+        for parameter in preferences_parameters:
+            # todos os valores possiveis para esse parametro depois da filtragem
+            preferences_parameters_values.append(
+                list(self.filter_X[parameter].unique()))
+        all_combinations = list(itertools.product(
+            *preferences_parameters_values))
+        instances = []
         # X é codificado como One-Hot encoding, entao todas as colunas sao numericas
-        for param in X:
-            if param in preferences:
-                instance.append(preferences[param][0])
-            else:
-                instance.append(0)
-        return instance
-
-    # @abstractmethod
-    # def recommender(self, data, feature, preferences, weights):
-    #     """Primitive operation. You HAVE TO override me, I'm a placeholder."""
-    #     pass
-
+        for combination in all_combinations:
+            instance = []
+            for param in X:
+                # se esse parametro não sofreu encoding
+                if param in preferences_parameters:
+                    instance.append(
+                        combination[preferences_parameters.index(param)])
+                # se sofreu encoding
+                elif PreferenceProcessor.is_parameter_in_preferences(param, preferences_parameters):
+                    decoded_param = PreferenceProcessor.parameter_from_encoded_parameter(
+                        param)
+                    value = combination[preferences_parameters.index(
+                        decoded_param)]
+                    # one-hot encoding entao tudo é 0 ou 1
+                    if str(decoded_param) + "_" + str(value) == param:
+                        instance.append(1)
+                    else:
+                        instance.append(0)
+                # se é um parâmetro fora das preferências
+                else:
+                    instance.append(np.nan)
+            imputer = Imputer(
+                missing_values=np.nan, strategy='mean', axis=0)
+            imputer = imputer.fit(X)
+            instance = imputer.transform([instance])[0]
+            instances.append(instance)
+        return instances
+        
     @abstractmethod
     def recommender(self, X, y, feature, preferences, weights):
         """Primitive operation. You HAVE TO override me, I'm a placeholder."""
@@ -76,22 +106,6 @@ class FeatureRecommender(ABC):
     def process_vote(self, votes):
         """Primitive operation. You HAVE TO override me, I'm a placeholder."""
         pass
-
-    def categorical_transformation(self, feature_columns):
-        # se a feature a recomendar nao for atributo categorico transformo em atributo categorico
-        if not isinstance(feature_columns.values[0], Number):
-            self.label_encoder = LabelEncoder()
-            feature_columns = self.label_encoder.fit_transform(
-                feature_columns.values)
-        else:
-            self.label_encoder = None
-        return feature_columns
-
-    def weights_selection(self, partition_weights):
-        if len(self.weights) > 0:
-            # pesos a partir dos indices de pesos
-            partition_weights = [self.weights[i] for i in partition_weights]
-        return partition_weights
 
 
 # TODO Atualizar o scikit-learn quando sair proxima release para parar de dar warning do numpy
