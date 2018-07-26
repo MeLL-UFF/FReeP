@@ -53,18 +53,23 @@ preferences = [
 y = data[feature]
 X = data.drop(feature, axis=1)
 
+print("Preferências: ", preferences)
+recommender = RankFeatureRecommender(X, y, PCAPartitioner(), classifier=KNeighborsClassifier(n_neighbors=3))
+recomendation = recommender.recommend(feature, preferences)
+print("Recomendação por RANK para", feature, 'é', recomendation)
+
 # print("Preferências: ", preferences)
 # recommender = ClassifierFeatureRecommender(X, y, PCAPartitioner(), classifier=KNeighborsClassifier(n_neighbors=3))
 # recomendation = recommender.recommend(feature, preferences)
 # print("Recomendação por KNN para", feature, 'é', recomendation)
 
-# recommender = ClassifierFeatureRecommender(X, y, PCAPartitioner(), classifier=SVC(probability=True))
-# recomendation = recommender.recommend(feature, preferences)
-# print("Recomendação por SVM para", feature, 'é', recomendation)
-
-recommender = ClassifierFeatureRecommender(X, y, PercentagePartitioner(), classifier=SVC(probability=True))
+recommender = ClassifierFeatureRecommender(X, y, PCAPartitioner(), classifier=SVC(probability=True))
 recomendation = recommender.recommend(feature, preferences)
 print("Recomendação por SVM para", feature, 'é', recomendation)
+
+# recommender = ClassifierFeatureRecommender(X, y, PercentagePartitioner(), classifier=SVC(probability=True))
+# recomendation = recommender.recommend(feature, preferences)
+# print("Recomendação por SVM para", feature, 'é', recomendation)
 
 print("\n####################################\n")
 
@@ -77,8 +82,8 @@ preferences = [
 y = data[feature]
 X = data.drop(feature, axis=1)
 
-print("Preferências: ", preferences)
-recommender = RegressorFeatureRecommender(X, y, PercentagePartitioner())
-recomendation = recommender.recommend(feature, preferences)
-print("Recomendação por KNR para", feature, 'é', recomendation)
+# print("Preferências: ", preferences)
+# recommender = RegressorFeatureRecommender(X, y, PercentagePartitioner())
+# recomendation = recommender.recommend(feature, preferences)
+# print("Recomendação por KNR para", feature, 'é', recomendation)
 

@@ -4,7 +4,7 @@ from sklearn.neighbors import KNeighborsClassifier
 import numbers
 from recommenders.feature_recommender import FeatureRecommender
 import numpy as np
-
+import copy
 
 class PreferenceRelation():
     def __init__(self, classes, classifier):
@@ -14,9 +14,11 @@ class PreferenceRelation():
 
 class RankFeatureRecommender(FeatureRecommender):
 
-    def __init__(self, X, y, partitioner, weights=[], neighbors=FeatureRecommender.NEIGHBORS):
+    def __init__(self, X, y, partitioner, weights=[],
+                 classifier=KNeighborsClassifier(n_neighbors=FeatureRecommender.NEIGHBORS)):
         super(RankFeatureRecommender, self).__init__(
-            X, y, partitioner, weights, neighbors)
+            X, y, partitioner, weights)
+        self.classifier = classifier
 
     def recommender(self, X, y, feature, preferences, weights):
         # as classes do meu problema são os valores da feature que quero recomendar
@@ -33,10 +35,10 @@ class RankFeatureRecommender(FeatureRecommender):
             X_ = X.iloc[index]
             y_ = y.iloc[index]
             if len(X_) >= self.neighbors:
-                neigh = KNeighborsClassifier(n_neighbors=self.neighbors)
-                neigh.fit(X_.values, y_.values)
+                classifier = copy.deepcopy(self.classifier)
+                classifier.fit(X_.values, y_.values)
                 preferences_relations.append(
-                    PreferenceRelation((c1, c2), neigh))
+                    PreferenceRelation((c1, c2), classifier))
         # inicializo os 'votos' zerados
         voting_classes = dict.fromkeys(classes, 0)
         voting_classes_number = dict.fromkeys(classes, 0)
@@ -46,14 +48,13 @@ class RankFeatureRecommender(FeatureRecommender):
             for relation in preferences_relations:
                 if class_ in relation.classes:
                     sorted_classes = sorted(relation.classes)
-                    instance = super(RankFeatureRecommender,
+                    instances = super(RankFeatureRecommender,
                                      self).to_predict_instance(X, preferences)
-                    prob_sorted_by_classes = relation.classifier.predict_proba([instance])[
-                        0]
+                    probs_sorted_by_classes = relation.classifier.predict_proba(instances)
                     if sorted_classes.index(class_) == 0:
-                        voting_classes[class_] += prob_sorted_by_classes[0]
+                        voting_classes[class_] += np.sum(probs_sorted_by_classes, axis=0)[0]
                     else:
-                        voting_classes[class_] += prob_sorted_by_classes[1]
+                        voting_classes[class_] += np.sum(probs_sorted_by_classes, axis=0)[1]
                     voting_classes_number[class_] += 1
         # nessa partição só existe um valor possível, então é 100% de certeza
         if len(classes_pairs) <= 0:
@@ -93,9 +94,9 @@ class RankFeatureRecommender(FeatureRecommender):
                 weight -= 1
             already_voted = []
         ordered_preferences = self.rank(classes)
-        resp = ordered_preferences[0][0]
-        confidence = ordered_preferences[0][1] / float(len(votes))
-        return (resp, confidence)
+        resp = [recomendation[0] for recomendation in ordered_preferences]
+        # confidence = ordered_preferences[0][1] / float(len(votes))
+        return resp
 
     def process_vote(self, votes):
         if len(votes) == 1:
