@@ -3,10 +3,9 @@ from numbers import Number
 import pandas as pd
 import numpy as np
 
-
 class EncodingProcessor():
 
-    def encode(self, X, y, preferences):
+    def encode(self, X, y):
         self.columns_names = list(X)
         if not isinstance(y.values[0], Number):
             self.y_encoder = LabelEncoder()
@@ -15,12 +14,10 @@ class EncodingProcessor():
             self.y_encoder = None
         X = pd.get_dummies(X)
         self.X_encoder = list(X)
-        preferences = pd.get_dummies(preferences)
-        self.preferences_encoder = list(preferences)
         # no_set_columns = list(set(self.X_encoder) - set(self.preferences_encoder))
         # for no_set_column in no_set_columns:
         #     preferences[no_set_column] = np.nan
-        return X, y, preferences
+        return X, y
 
     def encode_preference(self, preferences, encoded_preferences, current_preferences):
         resp = []

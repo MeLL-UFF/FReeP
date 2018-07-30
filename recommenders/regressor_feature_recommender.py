@@ -33,10 +33,10 @@ class RegressorFeatureRecommender(FeatureRecommender):
 
     def regression_prediction(self, X, y, preferences):
         self.regressor.fit(X.values, y.values)
-        instance = super(RegressorFeatureRecommender,
+        instances = super(RegressorFeatureRecommender,
                          self).to_predict_instance(X, preferences)
-        pred = self.regressor.predict([instance])[0]
-        return [(pred, None)]
+        predictions = self.regressor.predict(instances)
+        return [(prediction, None) for prediction in predictions]
 
     def marjority_prediction(self, X, y):
         (values,counts) = np.unique(y.values,return_counts=True)

@@ -34,11 +34,11 @@ class ClassifierFeatureRecommender(FeatureRecommender):
 
     def classifier_prediction(self, X, y, preferences):
         self.classifier.fit(X.values, y.values)
-        instance = super(ClassifierFeatureRecommender,
+        instances = super(ClassifierFeatureRecommender,
                          self).to_predict_instance(X, preferences)
-        pred = self.classifier.predict([instance])[0]
-        prob = max(self.classifier.predict_proba([instance])[0])
-        return [(pred, prob)]
+        predictions = self.classifier.predict(instances)
+        probs = np.array([max(l) for l in self.classifier.predict_proba(instances)])
+        return list(zip(predictions, probs))
 
     def marjority_prediction(self, X, y):
         counts = np.bincount(y.values.astype(int))
