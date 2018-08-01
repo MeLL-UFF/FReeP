@@ -12,6 +12,8 @@ class ClassifierFeatureRecommender(FeatureRecommender):
         super(ClassifierFeatureRecommender, self).__init__(
             X, y, partitioner, weights)
         self.classifier = classifier
+        if type(classifier) is KNeighborsClassifier:
+            self.neighbors = classifier.n_neighbors
 
     def recommender(self, X, y, feature, preferences, weights):
         """ X, y e preferences one-hot encoding"""

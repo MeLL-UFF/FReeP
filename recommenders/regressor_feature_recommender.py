@@ -12,6 +12,8 @@ class RegressorFeatureRecommender(FeatureRecommender):
         super(RegressorFeatureRecommender, self).__init__(
             X, y, partitioner, weights)
         self.regressor = regressor
+        if type(regressor) is KNeighborsRegressor:
+            self.neighbors = regressor.n_neighbors
 
     def recommender(self, X, y, feature, preferences, weights):
         """ X, y e preferences one-hot encoding"""
