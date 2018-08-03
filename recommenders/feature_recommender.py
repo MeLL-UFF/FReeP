@@ -21,30 +21,25 @@ class FeatureRecommender(ABC):
         self.partitioner = partitioner
 
     # Feature é uma coluna de um dataFrame
-    # Preferences é um dictionary
+    # Preferences é array com pandas conditions
     def recommend(self, feature, preferences):
-        preferences_parameters = PreferenceProcessor.parameters_in_preferences(
+        X_, y_, weights_ = self.partitioner.horizontal_filter(
+            self.X, self.y, preferences)
+        self.columns_in_preferences = PreferenceProcessor.parameters_in_preferences(
             preferences, self.X.columns.values)
-        preferences_partitions = self.partitioner.partition(
-            self.X, self.y, preferences, preferences_parameters)
+        self.preprocessor = EncodingProcessor()
+        # one-hot encoding
+        X_encoded, y_encoded = self.preprocessor.encode(
+            X_, y_)
+        partitions_for_recommender = self.partitioner.partition(
+            X_encoded, y_encoded, self.columns_in_preferences)
         votes = []
-        for current_preferences in preferences_partitions:
-            # vertical partition
-            X_partition = self.partitioner.vertical_partition(
-                self.X, current_preferences, preferences_parameters)
-            # horizontal parition
-            X_partition, y_partition, weights_ = self.partitioner.horizontal_partition(
-                X_partition, self.y, current_preferences, self.weights)
-            # pode ser que não tenha nenhuma proveniencia que obdeca os filtros de dados
+        for partition in partitions_for_recommender:
+            X_partition = self.partitioner.vertical_filter(
+                X_encoded,  partition)
             if len(X_partition) >= self.neighbors:
-                self.filter_X = X_partition.copy()
-                self.filter_y = y_partition.copy()
-                self.preprocessor = EncodingProcessor()
-                # one-hot encoding
-                X_partition, y_partition = self.preprocessor.encode(
-                    X_partition, y_partition)
                 vote = self.recommender(
-                    X_partition, y_partition, feature, current_preferences, weights_)
+                    X_partition, y_encoded, feature, partition, weights_)
                 processed_vote = self.process_vote(vote)
                 votes.append(processed_vote)
         if votes:
@@ -52,37 +47,21 @@ class FeatureRecommender(ABC):
         else:
             return None
 
-    def to_predict_instance(self, X, preferences):
-        preferences_parameters = PreferenceProcessor.parameters_in_preferences(
-            preferences, self.X.columns.values)
-        preferences_parameters_values = []
-        for parameter in preferences_parameters:
-            # todos os valores possiveis para esse parametro depois da filtragem
-            preferences_parameters_values.append(
-                list(self.filter_X[parameter].unique()))
+    def to_predict_instance(self, X, partition_columns):
+        values_for_preferences = []
+        for column in X.columns:
+            if PreferenceProcessor.is_parameter_in_preferences(column, self.columns_in_preferences):
+                values_for_preferences.append(list(X[column].unique()))
         all_combinations = list(itertools.product(
-            *preferences_parameters_values))
+            *values_for_preferences))
+
         instances = []
-        # X é codificado como One-Hot encoding, entao todas as colunas sao numericas
         for combination in all_combinations:
             instance = []
-            for param in X:
-                # se esse parametro não sofreu encoding
-                if param in preferences_parameters:
-                    instance.append(
-                        combination[preferences_parameters.index(param)])
-                # se sofreu encoding
-                elif PreferenceProcessor.is_parameter_in_preferences(param, preferences_parameters):
-                    decoded_param = PreferenceProcessor.parameter_from_encoded_parameter(
-                        param)
-                    value = combination[preferences_parameters.index(
-                        decoded_param)]
-                    # one-hot encoding entao tudo é 0 ou 1
-                    if str(decoded_param) + "_" + str(value) == param:
-                        instance.append(1)
-                    else:
-                        instance.append(0)
-                # se é um parâmetro fora das preferências
+            for column in X.columns:
+                # se é um parametro dentro das preferencias
+                if PreferenceProcessor.is_parameter_in_preferences(column, self.columns_in_preferences):
+                    instance.append(combination[values_for_preferences.index(param)])
                 else:
                     instance.append(np.nan)
             imputer = Imputer(
@@ -91,7 +70,7 @@ class FeatureRecommender(ABC):
             instance = imputer.transform([instance])[0]
             instances.append(instance)
         return instances
-        
+
     @abstractmethod
     def recommender(self, X, y, feature, preferences, weights):
         """Primitive operation. You HAVE TO override me, I'm a placeholder."""

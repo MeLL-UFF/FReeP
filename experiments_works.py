@@ -172,8 +172,9 @@ with open('results/numerical_results' + time.strftime('%a, %d %b %Y %H:%M:%S ') 
                                                                    regressor=regressor)
                         recomendation = recommender.recommend(
                             feature, resp)
-                        true_label.append(true_value)
-                        pred_label.append(recomendation[0])
+                        if recomendation != None:
+                            true_label.append(true_value)
+                            pred_label.append(recomendation[0])
                 end = time.time()
                 elapsed = end - start
                 mse = mean_squared_error(true_label, pred_label)
