@@ -25,27 +25,29 @@ class FeatureRecommender(ABC):
     def recommend(self, feature, preferences):
         X_, y_, weights_ = self.partitioner.horizontal_filter(
             self.X, self.y, preferences)
-        self.columns_in_preferences = PreferenceProcessor.parameters_in_preferences(
-            preferences, self.X.columns.values)
-        self.preprocessor = EncodingProcessor()
-        # one-hot encoding
-        X_encoded, y_encoded = self.preprocessor.encode(
-            X_, y_)
-        partitions_for_recommender = self.partitioner.partition(
-            X_encoded, y_encoded, self.columns_in_preferences)
-        votes = []
-        for partition in partitions_for_recommender:
-            X_partition = self.partitioner.vertical_filter(
-                X_encoded,  partition)
-            if len(X_partition) >= self.neighbors:
-                vote = self.recommender(
-                    X_partition, y_encoded, feature, partition, weights_)
-                processed_vote = self.process_vote(vote)
-                votes.append(processed_vote)
-        if votes:
-            return self.recomendation(votes)
-        else:
-            return None
+        if len(X) > FeatureRecommender.NEIGHBORS:
+            self.columns_in_preferences = PreferenceProcessor.parameters_in_preferences(
+                preferences, self.X.columns.values)
+            self.preprocessor = EncodingProcessor()
+            # one-hot encoding
+            X_encoded, y_encoded = self.preprocessor.encode(
+                X_, y_)
+            partitions_for_recommender = self.partitioner.partition(
+                X_encoded, y_encoded, self.columns_in_preferences)
+            votes = []
+            for partition in partitions_for_recommender:
+                X_partition = self.partitioner.vertical_filter(
+                    X_encoded,  partition)
+                if len(X_partition) >= self.neighbors:
+                    vote = self.recommender(
+                        X_partition, y_encoded, feature, partition, weights_)
+                    processed_vote = self.process_vote(vote)
+                    votes.append(processed_vote)
+            if votes:
+                return self.recomendation(votes)
+            else:
+                return None
+        return None
 
     def to_predict_instance(self, X, partition_columns):
         values_for_preferences = []
