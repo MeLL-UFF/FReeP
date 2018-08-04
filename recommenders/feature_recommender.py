@@ -49,8 +49,8 @@ class FeatureRecommender(ABC):
 
     def to_predict_instance(self, X, partition_columns):
         values_for_preferences = []
-        for column in X.columns:
-            if PreferenceProcessor.is_parameter_in_preferences(column, self.columns_in_preferences):
+        for column in partition_columns:
+            if PreferenceProcessor.is_parameter_in_preferences(column, partition_columns):
                 values_for_preferences.append(list(X[column].unique()))
         all_combinations = list(itertools.product(
             *values_for_preferences))
@@ -60,8 +60,13 @@ class FeatureRecommender(ABC):
             instance = []
             for column in X.columns:
                 # se é um parametro dentro das preferencias
-                if PreferenceProcessor.is_parameter_in_preferences(column, self.columns_in_preferences):
-                    instance.append(combination[values_for_preferences.index(param)])
+                if PreferenceProcessor.is_parameter_in_preferences(column, partition_columns):
+                    instance.append(
+                        combination[list(partition_columns).index(column)])
+                # se não está nas preferencias e esta codificado
+                elif len(column.split("#")) > 1:
+                    instance.append(0)
+                # se não está nas preferencias e não esta codificado
                 else:
                     instance.append(np.nan)
             imputer = Imputer(

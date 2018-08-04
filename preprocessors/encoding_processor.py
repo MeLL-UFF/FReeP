@@ -3,6 +3,7 @@ from numbers import Number
 import pandas as pd
 import numpy as np
 
+
 class EncodingProcessor():
 
     def encode(self, X, y):
@@ -12,7 +13,7 @@ class EncodingProcessor():
             y = pd.Series(self.y_encoder.fit_transform(y.values))
         else:
             self.y_encoder = None
-        X = pd.get_dummies(X)
+        X = pd.get_dummies(X, prefix_sep='#')
         self.X_encoder = list(X)
         # no_set_columns = list(set(self.X_encoder) - set(self.preferences_encoder))
         # for no_set_column in no_set_columns:
@@ -22,10 +23,10 @@ class EncodingProcessor():
     def encode_preference(self, preferences, encoded_preferences, current_preferences):
         resp = []
         for current_preference in current_preferences:
-            #a não ser que já seja uma preferencia numerica
+            # a não ser que já seja uma preferencia numerica
             if not isinstance(preferences[current_preference][0], Number):
-                #verifica se essa feature codificada esta entre as preferencias
-                preference = current_preference + '_' + \
+                # verifica se essa feature codificada esta entre as preferencias
+                preference = current_preference + '#' + \
                     preferences[current_preference][0]
                 if preference in self.preferences_encoder:
                     if encoded_preferences[preference][0] == 1:

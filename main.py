@@ -16,9 +16,6 @@ from partitioners.l2_norm_partitioner import L2NormPartitioner
 from partitioners.pca_partitioner import PCAPartitioner
 from preprocessors.encoding_processor import EncodingProcessor
 import time
-from preferences.preference import Preference
-from preferences.parameter import Parameter
-from preferences.value import Value
 
 # lendo dados originais, preciso desse float precision pra ele não arredondar
 data = pd.read_csv('data.csv', float_precision='round_trip')
@@ -48,9 +45,10 @@ data = data[~data['erro']].copy().drop('erro', axis=1).reset_index(drop=True)
 
 feature = 'model2'
 preferences = [
-    "( model1 == 'WAG+G' ) | ( model1 == 'WAG+I+F' )",
-    # "prob1 >= 1500",
-    # "length > 350"
+    # "( model1 == 'WAG+G' ) | ( model1 == 'WAG+I+F' )",
+    "prob1 >= 1000",
+    "length > 350",
+    "num_aligns >= 10"
     ]
 y = data[feature]
 X = data.drop(feature, axis=1)

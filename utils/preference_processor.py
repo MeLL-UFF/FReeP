@@ -26,12 +26,12 @@ class PreferenceProcessor():
 
     @staticmethod
     def is_parameter_in_preferences(parameter, preferences):
-        parameter = parameter.split('_')[0]
+        parameter = parameter.split('#')[0]
         return parameter in preferences
 
     @staticmethod
     def parameter_from_encoded_parameter(parameter):
-        return parameter.split('_')[0]
+        return parameter.split('#')[0]
 
     @staticmethod
     def encoded_columns_in_original_columns(current_columns_in_preferences, all_columns_in_preferences,
