@@ -25,7 +25,7 @@ class FeatureRecommender(ABC):
     def recommend(self, feature, preferences):
         X_, y_, weights_ = self.partitioner.horizontal_filter(
             self.X, self.y, preferences)
-        if len(X) > FeatureRecommender.NEIGHBORS:
+        if len(X_) > FeatureRecommender.NEIGHBORS:
             self.columns_in_preferences = PreferenceProcessor.parameters_in_preferences(
                 preferences, self.X.columns.values)
             self.preprocessor = EncodingProcessor()
