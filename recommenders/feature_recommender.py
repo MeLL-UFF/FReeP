@@ -98,3 +98,4 @@ class FeatureRecommender(ABC):
 import warnings
 
 warnings.simplefilter("ignore", DeprecationWarning)
+warnings.simplefilter("ignore", UserWarning)

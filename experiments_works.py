@@ -46,6 +46,7 @@ def classifier_name(classifier):
         else:
             return 'KNN 7'
 
+
 def regressor_name(regressor):
     if type(regressor) is SVR:
         return 'SVR'
@@ -53,7 +54,7 @@ def regressor_name(regressor):
         return 'Multi Layer Perceptron'
     elif type(regressor) is LinearRegression:
         return 'Linear Regression'
-    else:   
+    else:
         # KNR
         if regressor.n_neighbors == 3:
             return 'KNR 3'
@@ -66,16 +67,20 @@ def regressor_name(regressor):
 data = pd.read_csv('data.csv', float_precision='round_trip')
 # apenas os dados de sucesso, sem a coluna de erro
 data = data[~data['erro']].copy().drop('erro', axis=1).reset_index(drop=True)
+#removendo as duplicidades para teste de resultados
+# data = data.drop_duplicates()
 
 kf = KFold(n_splits=5)
 
 categorical_features = ['model1', 'model2']
 
-classifiers = [KNeighborsClassifier(n_neighbors=3),
-               KNeighborsClassifier(n_neighbors=5),
-               KNeighborsClassifier(n_neighbors=7),
-               SVC(probability=True),
-               MLPClassifier(solver='sgd', hidden_layer_sizes=(6,), random_state=1)]
+classifiers = [
+    KNeighborsClassifier(n_neighbors=3),
+       KNeighborsClassifier(n_neighbors=5),
+       KNeighborsClassifier(n_neighbors=7),
+       SVC(probability=True),
+    #    MLPClassifier(solver='sgd', hidden_layer_sizes=(6,), random_state=1)
+]
 
 partitioners = [
     FullPartitioner(),
@@ -95,12 +100,12 @@ with open('results/categorical_results' + time.strftime('%a, %d %b %Y %H:%M:%S '
             print("CLASSIFIER %s" % classifier)
             for partitioner in partitioners:
                 start = time.time()
+                true_label = []
+                pred_label = []
                 for train_index, test_index in kf.split(data):
                     train_data = data.iloc[train_index]
-                    y = data[feature]
-                    X = data.drop(feature, axis=1)
-                    true_label = []
-                    pred_label = []
+                    y = train_data[feature]
+                    X = train_data.drop(feature, axis=1)
 
                     for idx in test_index:
                         preferences = data.iloc[idx].to_dict()
@@ -117,7 +122,7 @@ with open('results/categorical_results' + time.strftime('%a, %d %b %Y %H:%M:%S '
                                                                    classifier=classifier)
                         recomendation = recommender.recommend(
                             feature, resp)
-                        if recomendation != None: 
+                        if recomendation != None:
                             true_label.append(true_value)
                             pred_label.append(recomendation[0])
                 end = time.time()
@@ -144,7 +149,7 @@ regressors = [
 with open('results/numerical_results' + time.strftime('%a, %d %b %Y %H:%M:%S ') + '.csv', 'w') as f:
     writer = csv.writer(f, delimiter=';')
     writer.writerow(
-        ['FEATURE', 'REGRESSOR', 'PARTITIONER', 'ACCURACY', 'TIME'])
+        ['FEATURE', 'REGRESSOR', 'PARTITIONER', 'MSE', 'TIME'])
     for feature in numerical_features:
         print("FEATURE %s" % feature)
         for regressor in regressors:
@@ -152,8 +157,8 @@ with open('results/numerical_results' + time.strftime('%a, %d %b %Y %H:%M:%S ') 
                 start = time.time()
                 for train_index, test_index in kf.split(data):
                     train_data = data.iloc[train_index]
-                    y = data[feature]
-                    X = data.drop(feature, axis=1)
+                    y = train_data[feature]
+                    X = train_data.drop(feature, axis=1)
                     true_label = []
                     pred_label = []
 
@@ -169,7 +174,7 @@ with open('results/numerical_results' + time.strftime('%a, %d %b %Y %H:%M:%S ') 
                             else:
                                 resp.append(str(key) + ' == ' + str(value))
                         recommender = RegressorFeatureRecommender(X, y, partitioner,
-                                                                   regressor=regressor)
+                                                                  regressor=regressor)
                         recomendation = recommender.recommend(
                             feature, resp)
                         if recomendation != None:

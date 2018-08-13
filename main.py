@@ -45,10 +45,12 @@ data = data[~data['erro']].copy().drop('erro', axis=1).reset_index(drop=True)
 
 feature = 'model2'
 preferences = [
-    # "( model1 == 'WAG+G' ) | ( model1 == 'WAG+I+F' )",
-    "prob1 >= 1000",
-    "length > 350",
-    "num_aligns >= 10"
+    # "length == 237.0",
+    "model1 == 'WAG+G'",
+    # "prob1 == 1588.4588012017",
+    # "model2 == WAG+G",
+    # "prob2 == 1588.4588012017",
+    "num_aligns == 10"
     ]
 y = data[feature]
 X = data.drop(feature, axis=1)
@@ -67,9 +69,9 @@ print("Recomendação por KNN para", feature, 'é', recomendation)
 # recomendation = recommender.recommend(feature, preferences)
 # print("Recomendação por SVM para", feature, 'é', recomendation)
 
-recommender = ClassifierFeatureRecommender(X, y, PercentagePartitioner(), classifier=SVC(probability=True))
-recomendation = recommender.recommend(feature, preferences)
-print("Recomendação por SVM para", feature, 'é', recomendation)
+# recommender = ClassifierFeatureRecommender(X, y, PercentagePartitioner(), classifier=SVC(probability=True))
+# recomendation = recommender.recommend(feature, preferences)
+# print("Recomendação por SVM para", feature, 'é', recomendation)
 
 # print("\n####################################\n")
 
