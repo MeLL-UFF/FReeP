@@ -23,31 +23,46 @@ class FeatureRecommender(ABC):
     # Feature é uma coluna de um dataFrame
     # Preferences é array com pandas conditions
     def recommend(self, feature, preferences):
-        X_, y_, weights_ = self.partitioner.horizontal_filter(
-            self.X, self.y, preferences)
-        if len(X_) > FeatureRecommender.NEIGHBORS:
-            self.columns_in_preferences = PreferenceProcessor.parameters_in_preferences(
-                preferences, self.X.columns.values)
-            self.preprocessor = EncodingProcessor()
-            # one-hot encoding
+        self.columns_in_preferences = PreferenceProcessor.parameters_in_preferences(
+            preferences, self.X.columns.values)
+
+        self.preprocessor = EncodingProcessor()
+        # one-hot encoding
+        X_encoded, y_encoded = self.preprocessor.encode(
+            self.X, self.y)
+        partitions_for_recommender = self.partitioner.partition(
+            X_encoded, y_encoded, self.columns_in_preferences)
+        votes = []
+        for partition in partitions_for_recommender:
+            preferences_for_partition = []
+
+            # checar quais preferencias tem todas as colunas dessa partição
+            for preference in preferences:
+                current_preference_parameters = PreferenceProcessor.parameters_in_preferences([preference],
+                                                                                              self.X.columns.values)
+                decodeds_parameters = set(
+                    [PreferenceProcessor.parameter_from_encoded_parameter(elem) for elem in partition.values])
+                result = all(elem in decodeds_parameters for elem in current_preference_parameters)
+                if result:
+                    preferences_for_partition.append(preference)
+
+            # aplicar o filtro das preferencias no X e y originais
+            X_, y_, weights_ = self.partitioner.horizontal_filter(
+                self.X, self.y, preferences_for_partition)
+            # codificar X e y resultantes
             X_encoded, y_encoded = self.preprocessor.encode(
-                X_, y_)
-            partitions_for_recommender = self.partitioner.partition(
-                X_encoded, y_encoded, self.columns_in_preferences)
-            votes = []
-            for partition in partitions_for_recommender:
-                X_partition = self.partitioner.vertical_filter(
-                    X_encoded,  partition)
-                if len(X_partition) >= self.neighbors:
-                    vote = self.recommender(
-                        X_partition, y_encoded, feature, partition, weights_)
-                    processed_vote = self.process_vote(vote)
-                    votes.append(processed_vote)
-            if votes:
-                return self.recomendation(votes)
-            else:
-                return None
-        return None
+                self.X, self.y)
+            X_partition = self.partitioner.vertical_filter(
+                X_encoded, partition)
+            if len(X_partition) >= self.neighbors:
+                vote = self.recommender(
+                    X_partition, y_encoded, feature, partition, weights_)
+                processed_vote = self.process_vote(vote)
+                votes.append(processed_vote)
+        if votes:
+            return self.recomendation(votes)
+        else:
+            return None
 
     def to_predict_instance(self, X, partition_columns):
         values_for_preferences = []
