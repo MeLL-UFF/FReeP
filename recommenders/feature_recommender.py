@@ -51,7 +51,7 @@ class FeatureRecommender(ABC):
                 self.X, self.y, preferences_for_partition)
             # codificar X e y resultantes
             X_encoded, y_encoded = self.preprocessor.encode(
-                self.X, self.y)
+                X_, y_)
             X_partition = self.partitioner.vertical_filter(
                 X_encoded, partition)
             if len(X_partition) >= self.neighbors:
