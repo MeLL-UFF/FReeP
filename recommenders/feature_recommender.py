@@ -41,7 +41,7 @@ class FeatureRecommender(ABC):
                 current_preference_parameters = PreferenceProcessor.parameters_in_preferences([preference],
                                                                                               self.X.columns.values)
                 decodeds_parameters = set(
-                    [PreferenceProcessor.parameter_from_encoded_parameter(elem) for elem in partition.values])
+                    [PreferenceProcessor.parameter_from_encoded_parameter(elem) for elem in partition])
                 result = all(elem in decodeds_parameters for elem in current_preference_parameters)
                 if result:
                     preferences_for_partition.append(preference)
