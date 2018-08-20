@@ -49,12 +49,12 @@ class FeatureRecommender(ABC):
             # aplicar o filtro das preferencias no X e y originais
             X_, y_, weights_ = self.partitioner.horizontal_filter(
                 self.X, self.y, preferences_for_partition)
-            # codificar X e y resultantes
-            X_encoded, y_encoded = self.preprocessor.encode(
-                X_, y_)
-            X_partition = self.partitioner.vertical_filter(
-                X_encoded, partition)
-            if len(X_partition) >= self.neighbors:
+            if len(X_) >= self.neighbors:
+                # codificar X e y resultantes
+                X_encoded, y_encoded = self.preprocessor.encode(
+                    X_, y_)
+                X_partition = self.partitioner.vertical_filter(
+                    X_encoded, partition)
                 vote = self.recommender(
                     X_partition, y_encoded, feature, partition, weights_)
                 processed_vote = self.process_vote(vote)
