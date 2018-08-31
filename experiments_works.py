@@ -65,6 +65,7 @@ def regressor_name(regressor):
 
 
 data = pd.read_csv('data.csv', float_precision='round_trip')
+data = pd.read_csv('data.csv', float_precision='round_trip')
 # apenas os dados de sucesso, sem a coluna de erro
 data = data[~data['erro']].copy().drop('erro', axis=1).reset_index(drop=True)
 #removendo as duplicidades para teste de resultados
@@ -83,7 +84,7 @@ classifiers = [
 ]
 
 partitioners = [
-    FullPartitioner(),
+    # FullPartitioner(),
     PCAPartitioner(),
     PercentagePartitioner()
 ]
@@ -114,8 +115,7 @@ with open('results/categorical_results' + time.strftime('%a, %d %b %Y %H:%M:%S '
                         resp = []
                         for key, value in preferences.items():
                             if type(value) is str:
-                                resp.append(str(key) + " == " +
-                                            "'"+str(value)+"'")
+                                resp.append("{} == '{}'".format(str(key), str(value)))
                             else:
                                 resp.append(str(key) + ' == ' + str(value))
                         recommender = ClassifierFeatureRecommender(X, y, partitioner,

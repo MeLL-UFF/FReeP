@@ -5,32 +5,12 @@ from utils.preference_processor import PreferenceProcessor
 
 class Partitioner(ABC):
 
-    def vertical_partition(self, X, current_preferences, preferences_parameters):
-        current_preferences_parameters = PreferenceProcessor.parameters_in_preferences(
-            current_preferences, X.columns.values)
-        diff = list(set(X.columns.values) - set(preferences_parameters))
-        current_columns = current_preferences_parameters + diff
-        return X[X.columns.intersection(current_columns)]
-
-    def horizontal_partition(self, X, y, current_preferences, weights=[]):
-        X_ = X.copy()
-        y_ = y.copy()
-        weights_ = weights.copy()
-        for preference in current_preferences:
-            X_ = X_[eval(PreferenceProcessor.preference_for_eval(
-                preference, X.columns.values))]
-            # filtro os registros que possuem os mesmos valores das preferências
-            # indices dos pesos associados a essa partição
-            if len(weights) > 0:
-                weights_ = weights.loc[X_.index]
-            y_ = y.loc[X_.index]
-        return X_, y_, weights_
-    
     def horizontal_filter(self, X, y, preferences, weights=[]):
         X_ = X.copy()
         y_ = y.copy()
         weights_ = weights.copy()
         for preference in preferences:
+            #TODO preciso saber com filtrar por float de uma forma eficiente!!!
             X_ = X_[eval(PreferenceProcessor.preference_for_eval(
                 preference, X.columns.values))]
             # filtro os registros que possuem os mesmos valores das preferências
