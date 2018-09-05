@@ -35,3 +35,9 @@ class Partitioner(ABC):
                       columns, [[]])
         # apenas os conjuntos com pelo menos dois elementos
         return [set_ for set_ in sets if len(set_) > 1]
+
+    @abstractmethod
+    def all_columns_present(self, partition, columns):
+        """Primitive operation. You HAVE TO override me, I'm a placeholder."""
+        """Essa funcao deve retornar as combinacoes de preferencias"""
+        pass

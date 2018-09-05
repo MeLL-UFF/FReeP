@@ -25,7 +25,7 @@ class PCAPartitioner(Partitioner):
             pca_partition.fit(X_partition)
             partition_similarity_metric = pca_partition.singular_values_
             diff_similarity_metric = np.linalg.norm(
-                original_similarity_metric-partition_similarity_metric)
+                original_similarity_metric - partition_similarity_metric)
             partitions.append([diff_similarity_metric, X_partition.columns])
         partitions = sorted(partitions, key=lambda x: x[0])
         maximum_partitions = int(
@@ -33,3 +33,6 @@ class PCAPartitioner(Partitioner):
         partitions = partitions[:maximum_partitions]
         partitions_for_recomender = [partition[1] for partition in partitions]
         return partitions_for_recomender
+
+    def all_columns_present(self, partition, columns):
+        return all(elem in partition for elem in columns)

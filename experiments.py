@@ -80,7 +80,7 @@ classifiers = [
        KNeighborsClassifier(n_neighbors=5),
        KNeighborsClassifier(n_neighbors=7),
        SVC(probability=True),
-    #    MLPClassifier(solver='sgd', hidden_layer_sizes=(6,), random_state=1)
+       MLPClassifier(solver='sgd', hidden_layer_sizes=(6,), random_state=1)
 ]
 
 partitioners = [
@@ -169,8 +169,7 @@ with open('results/numerical_results' + time.strftime('%a, %d %b %Y %H:%M:%S ') 
                         resp = []
                         for key, value in preferences.items():
                             if type(value) is str:
-                                resp.append(str(key) + " == " +
-                                            "'"+str(value)+"'")
+                                resp.append("{} == '{}'".format(str(key), str(value)))
                             else:
                                 resp.append(str(key) + ' == ' + str(value))
                         recommender = RegressorFeatureRecommender(X, y, partitioner,

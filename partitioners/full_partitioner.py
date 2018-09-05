@@ -11,3 +11,6 @@ class FullPartitioner(Partitioner):
             if PreferenceProcessor.is_parameter_in_preferences(column, columns_in_preferences):
                 columns.append(column)
         return super(FullPartitioner, self).powerset(columns)
+
+    def all_columns_present(self, partition, columns):
+        return all(elem in partition for elem in columns)

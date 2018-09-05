@@ -55,7 +55,8 @@ class FeatureRecommender(ABC):
                 X_encoded, y_encoded = self.preprocessor.encode(
                     X_, y_)
                 #todas as colunas da partição atual estão no X_encoded?
-                if all(elem in partition for elem in X_.columns):
+                if self.partitioner.all_columns_present(partition, X_encoded.columns):
+                # if all(elem in partition for elem in X_encoded.columns):
                     X_partition = self.partitioner.vertical_filter(
                         X_encoded, partition)
                     vote = self.recommender(

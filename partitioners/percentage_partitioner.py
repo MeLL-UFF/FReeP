@@ -20,10 +20,13 @@ class PercentagePartitioner(Partitioner):
                 PreferenceProcessor.parameter_from_encoded_parameter(column))
         resp = []
         for preference in columns_in_preferences:
-            #todos os parametros nesta preferencia
+            # todos os parametros nesta preferencia
             parameters = PreferenceProcessor.parameters_in_preferences(
                 [preference], parameters_in_preferences)
-            #parametros dessa preferencia estao nas preferencias das particoes
+            # parametros dessa preferencia estao nas preferencias das particoes
             if all(elem in parameters_in_preferences for elem in parameters):
                 resp.append(preference)
         return super(PercentagePartitioner, self).powerset(resp)
+
+    def all_columns_present(self, partition, columns):
+        return all(elem in columns for elem in partition)
