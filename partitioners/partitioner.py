@@ -5,18 +5,12 @@ from utils.preference_processor import PreferenceProcessor
 
 class Partitioner(ABC):
 
-    def vertical_partition(self, X, current_preferences, preferences_parameters):
-        current_preferences_parameters = PreferenceProcessor.parameters_in_preferences(
-            current_preferences, X.columns.values)
-        diff = list(set(X.columns.values) - set(preferences_parameters))
-        current_columns = current_preferences_parameters + diff
-        return X[X.columns.intersection(current_columns)]
-
-    def horizontal_partition(self, X, y, current_preferences, weights=[]):
+    def horizontal_filter(self, X, y, preferences, weights=[]):
         X_ = X.copy()
         y_ = y.copy()
         weights_ = weights.copy()
-        for preference in current_preferences:
+        for preference in preferences:
+            #TODO preciso saber com filtrar por float de uma forma eficiente!!!
             X_ = X_[eval(PreferenceProcessor.preference_for_eval(
                 preference, X.columns.values))]
             # filtro os registros que possuem os mesmos valores das preferências
@@ -25,6 +19,9 @@ class Partitioner(ABC):
                 weights_ = weights.loc[X_.index]
             y_ = y.loc[X_.index]
         return X_, y_, weights_
+    
+    def vertical_filter(self, X, columns):
+        return X[X.columns.intersection(columns)]
 
     @abstractmethod
     def partition(self, X, y, preferences_columns, preferences_parameters):
@@ -38,3 +35,9 @@ class Partitioner(ABC):
                       columns, [[]])
         # apenas os conjuntos com pelo menos dois elementos
         return [set_ for set_ in sets if len(set_) > 1]
+
+    @abstractmethod
+    def all_columns_present(self, partition, columns):
+        """Primitive operation. You HAVE TO override me, I'm a placeholder."""
+        """Essa funcao deve retornar as combinacoes de preferencias"""
+        pass

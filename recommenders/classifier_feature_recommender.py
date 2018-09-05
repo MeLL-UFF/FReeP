@@ -12,14 +12,16 @@ class ClassifierFeatureRecommender(FeatureRecommender):
         super(ClassifierFeatureRecommender, self).__init__(
             X, y, partitioner, weights)
         self.classifier = classifier
+        if type(classifier) is KNeighborsClassifier:
+            self.neighbors = classifier.n_neighbors
 
-    def recommender(self, X, y, feature, preferences, weights):
+    def recommender(self, X, y, feature, partition_columns, weights):
         """ X, y e preferences one-hot encoding"""
         # se só tem uma classe
         if len(np.unique(y.values)) == 1:
             return self.marjority_prediction(X, y)
         else:
-            return self.classifier_prediction(X,y,preferences)
+            return self.classifier_prediction(X,y,partition_columns)
         
     def recomendation(self, votes):
         l = [vote[0] for candidates in votes for vote in candidates]
@@ -32,10 +34,10 @@ class ClassifierFeatureRecommender(FeatureRecommender):
         decode = self.preprocessor.decode_y(votes[0][0])
         return [(decode, votes[0][1])]
 
-    def classifier_prediction(self, X, y, preferences):
+    def classifier_prediction(self, X, y, partition_columns):
         self.classifier.fit(X.values, y.values)
         instances = super(ClassifierFeatureRecommender,
-                         self).to_predict_instance(X, preferences)
+                         self).to_predict_instance(X, partition_columns)
         predictions = self.classifier.predict(instances)
         probs = np.array([max(l) for l in self.classifier.predict_proba(instances)])
         return list(zip(predictions, probs))
