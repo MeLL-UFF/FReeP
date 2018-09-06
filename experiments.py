@@ -84,7 +84,7 @@ classifiers = [
 ]
 
 partitioners = [
-    # FullPartitioner(),
+    FullPartitioner(),
     PCAPartitioner(),
     PercentagePartitioner()
 ]
