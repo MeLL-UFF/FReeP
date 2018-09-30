@@ -6,6 +6,7 @@ from recommenders.custom_knn_feature_recommender import CustomKNNFeatureRecommen
 from recommenders.rank_feature_recommender import RankFeatureRecommender
 from recommenders.classifier_feature_recommender import ClassifierFeatureRecommender
 from recommenders.regressor_feature_recommender import RegressorFeatureRecommender
+from recommenders.multi_recommendation import MultiRecommendation
 from sklearn.svm import SVR
 from sklearn.linear_model import LinearRegression
 from sklearn.neighbors import KNeighborsRegressor
@@ -61,9 +62,10 @@ X = data.drop(feature, axis=1)
 # print("Recomendação por RANK para", feature, 'é', recomendation)
 
 print("Preferências: ", preferences)
-recommender = ClassifierFeatureRecommender(X, y, PCAPartitioner(), classifier=KNeighborsClassifier(n_neighbors=3))
-recomendation = recommender.recommend(feature, preferences)
-print("Recomendação por KNN para", feature, 'é', recomendation)
+recommender = MultiRecommendation(data, PCAPartitioner())
+# recommender = ClassifierFeatureRecommender(X, y, PCAPartitioner(), classifier=KNeighborsClassifier(n_neighbors=3))
+recomendation = recommender.recommend(preferences)
+# print("Recomendação por KNN para", feature, 'é', recomendation)
 
 # recommender = ClassifierFeatureRecommender(X, y, PCAPartitioner(), classifier=SVC(probability=True))
 # recomendation = recommender.recommend(feature, preferences)
