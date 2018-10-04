@@ -65,7 +65,7 @@ print("Preferências: ", preferences)
 recommender = MultiRecommendation(data, PCAPartitioner())
 # recommender = ClassifierFeatureRecommender(X, y, PCAPartitioner(), classifier=KNeighborsClassifier(n_neighbors=3))
 recomendation = recommender.recommend(preferences)
-# print("Recomendação por KNN para", feature, 'é', recomendation)
+print("MultiRecomendação: ", feature, 'é', recomendation)
 
 # recommender = ClassifierFeatureRecommender(X, y, PCAPartitioner(), classifier=SVC(probability=True))
 # recomendation = recommender.recommend(feature, preferences)

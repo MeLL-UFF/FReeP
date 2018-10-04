@@ -5,10 +5,9 @@ from recommenders.classifier_feature_recommender import ClassifierFeatureRecomme
 from recommenders.regressor_feature_recommender import RegressorFeatureRecommender
 from sklearn.svm import SVR
 from sklearn.svm import SVC
-
+from collections import Counter
 
 class MultiRecommendation():
-
     ITERATIONS = 5
 
     def __init__(self, data, partitioner):
@@ -37,24 +36,31 @@ class MultiRecommendation():
                 y = self.data[column]
                 X = self.data.drop(
                     list(set(columns_to_recommend) - set(tmp_columns_preferences)), axis=1)
-                if is_numeric_dtype(y):
-                    recommender = RegressorFeatureRecommender(X, y, self.partitioner,
-                                                              regressor=SVR())
-                else:
-                    recommender = ClassifierFeatureRecommender(X, y, self.partitioner,
-                                                               classifier=SVC())
+                recommender = self.model_type(X, y)
                 vote = recommender.recommend(column, tmp_preferences)
-                #TODO quando o parâmetro que recomendo primeiro é um numeral
-                # como é feita a regressão, o filtro horizontal provavelmente vai 
-                # ser vazio por não possuir registro com esse valor exato de recomendação
-                if vote == None:
-                    print('aqui')
                 votes[column].append(vote[0])
-                if is_numeric_dtype(y):
-                    tmp_preferences.append(str(column)+" == "+str(vote[0]))
-                else:
-                    tmp_preferences.append(
-                        str(column)+" == '"+str(vote[0])+"'")
+                preference = self.preference_to_append(y, column, vote[0])
+                tmp_preferences.append(preference)
                 tmp_columns_preferences.append(column)
-            print(votes)
-        #TODO votação com todos os parâmetros recomendados
+        resp = {}
+        for param, vts in votes.items():
+            elected = Counter(vts).most_common(1)[0][0]
+            resp[param] = elected
+        return resp
+
+    def model_type(self, X, y):
+        if is_numeric_dtype(y):
+            return RegressorFeatureRecommender(X, y, self.partitioner,
+                                               regressor=SVR())
+        else:
+            return ClassifierFeatureRecommender(X, y, self.partitioner,
+                                                classifier=SVC())
+
+    def preference_to_append(self, y, column, vote_value):
+        if is_numeric_dtype(y):
+            std = y.std()
+            return '( '+str(column) + " <= " + str(vote_value + std) + ' ) | ' \
+                   + '( '+ str(column) + " >= " + str(vote_value - std) + ' )'
+
+        else:
+            return str(column) + " == '" + str(vote_value) + "'"
