@@ -14,9 +14,11 @@ experiment = ExperimentScript()
 experiment.run_classifier(data, categorical_features,
                           5, categorical_result_path)
 
-
+categorical_graph_path = 'results/categorical_graph' + \
+    time.strftime('%a, %d %b %Y %H:%M:%S ') + '.pdf'
+graph_data = pd.read_csv(categorical_result_path, float_precision='round_trip')
 graph_generator = GraphGenerator()
-graph_generator.bar_plot
+graph_generator.bar_graph(graph_data, categorical_graph_path, "PARTITIONER", "TIME", "CLASSIFIER", "TIME")
 
 numerical_features = ['num_aligns', 'length', 'prob1', 'prob2']
 numerical_result_path = 'results/numerical_results' + \

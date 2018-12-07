@@ -75,7 +75,7 @@ class ExperimentScript():
 
     def partitioners(self):
         return [
-            FullPartitioner(),
+            # FullPartitioner(),
             PCAPartitioner(),
             PercentagePartitioner()
         ]
