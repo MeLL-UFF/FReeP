@@ -169,8 +169,9 @@ class ExperimentScript():
                                     pred_label.append(recomendation[0])
                         end = time.time()
                         elapsed = end - start
-                        mse = mean_squared_error(true_label, pred_label)
-                        regr_name = self.regressor_name(regressor)
-                        part_name = self.partitioner_name(partitioner)
-                        row = [feature, regr_name, part_name, mse, elapsed]
-                        writer.writerow(row)
+                        if len(true_label) > 0:
+                            mse = mean_squared_error(true_label, pred_label)
+                            regr_name = self.regressor_name(regressor)
+                            part_name = self.partitioner_name(partitioner)
+                            row = [feature, regr_name, part_name, mse, elapsed]
+                            writer.writerow(row)
