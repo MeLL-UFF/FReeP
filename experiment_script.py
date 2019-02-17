@@ -170,7 +170,7 @@ def classifier_execution(params):
             for i in range(remove_preferences_number):
                 random_number = preferences_number = randint(
                     0, len(resp)-1)
-                del resp[i]
+                del resp[random_number]
             recommender = ClassifierFeatureRecommender(X, y, partitioner,
                                                        classifier=classifier)
             recomendation = recommender.recommend(
@@ -232,7 +232,7 @@ def regressor_execution(params):
             for i in range(remove_preferences_number):
                 random_number = preferences_number = randint(
                     0, len(resp)-1)
-                del resp[i]
+                del resp[random_number]
             recommender = RegressorFeatureRecommender(X, y, partitioner,
                                                       regressor=regressor)
             recomendation = recommender.recommend(
