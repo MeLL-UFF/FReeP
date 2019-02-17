@@ -125,7 +125,8 @@ def run_classifier(data, categorical_features, split_number, categorical_result_
         pool = mp.Pool()
         res  = pool.map(classifier_execution, paramlist)
         for row in res:
-            writer.writerow(row)
+            if len(row) > 0:
+                writer.writerow(row)
 
         #  classifier_execution(classifier, partitioner, percentile, kf, data,
         #                           feature, writer)
@@ -186,7 +187,8 @@ def run_regressors(  data, numerical_features, split_number, numerical_result_pa
         pool = mp.Pool()
         res  = pool.map(regressor_execution, paramlist)
         for row in res:
-            writer.writerow(row)
+            if len(row) > 0:
+                writer.writerow(row)
         # for feature in numerical_features:
         #     for regressor in  regressors():
         #         for partitioner in  partitioners():
