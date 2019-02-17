@@ -26,7 +26,7 @@ from sklearn.metrics import recall_score
 from sklearn.metrics import mean_squared_error
 
 
-def partitioner_name(  partitioner):
+def partitioner_name(partitioner):
     if type(partitioner) is PCAPartitioner:
         return 'PCA'
     elif type(partitioner) is PercentagePartitioner:
@@ -34,7 +34,8 @@ def partitioner_name(  partitioner):
     else:
         return 'Full'
 
-def classifier_name(  classifier):
+
+def classifier_name(classifier):
     if type(classifier) is SVC:
         return 'SVM'
     elif type(classifier) is MLPClassifier:
@@ -48,7 +49,8 @@ def classifier_name(  classifier):
         else:
             return 'KNN 7'
 
-def regressor_name(  regressor):
+
+def regressor_name(regressor):
     if type(regressor) is SVR:
         return 'SVR'
     elif type(regressor) is MLPRegressor:
@@ -64,25 +66,29 @@ def regressor_name(  regressor):
         else:
             return 'KNR 7'
 
-def classifiers( ):
+
+def classifiers():
     return [
         KNeighborsClassifier(n_neighbors=3),
         KNeighborsClassifier(n_neighbors=5),
         KNeighborsClassifier(n_neighbors=7),
         SVC(probability=True),
         MLPClassifier(solver='sgd', hidden_layer_sizes=(6,),
-                        random_state=1)
+                      random_state=1)
     ]
 
-def partitioners( ):
+
+def partitioners():
     return [
         PCAPartitioner,
         PercentagePartitioner,
         # FullPartitioner()
     ]
 
-def percentiles( ):
+
+def percentiles():
     return [30, 50, 70]
+
 
 def regressors():
     return [
@@ -94,7 +100,8 @@ def regressors():
         MLPRegressor(solver='sgd', hidden_layer_sizes=(6,), random_state=1)
     ]
 
-def join_preferences_key_values(  preferences):
+
+def join_preferences_key_values(preferences):
     resp = []
     for key, value in preferences.items():
         if type(value) is str:
@@ -103,11 +110,13 @@ def join_preferences_key_values(  preferences):
             resp.append(str(key) + ' == ' + str(value))
     return resp
 
-def train_data(  data, feature, index):
+
+def train_data(data, feature, index):
     train_data = data.iloc[index]
     y = train_data[feature]
     X = train_data.drop(feature, axis=1)
     return X, y
+
 
 def run_classifier(data, categorical_features, split_number, categorical_result_path):
     kf = KFold(n_splits=split_number)
@@ -119,11 +128,11 @@ def run_classifier(data, categorical_features, split_number, categorical_result_
         #     for classifier in  classifiers():
         #         for partitioner in  classifiers():
         #             for percentile in  percentiles():
-        paramlist = list(itertools.product( classifiers(),  partitioners(),
-                                             percentiles(), [kf], [data], categorical_features))
+        paramlist = list(itertools.product(classifiers(),  partitioners(),
+                                           percentiles(), [kf], [data], categorical_features))
 
         pool = mp.Pool()
-        res  = pool.map(classifier_execution, paramlist)
+        res = pool.map(classifier_execution, paramlist)
         for row in res:
             if len(row) > 0:
                 writer.writerow(row)
@@ -132,6 +141,8 @@ def run_classifier(data, categorical_features, split_number, categorical_result_
         #                           feature, writer)
 
 # def classifier_execution(  classifier, partitioner, percentile, kf, data, feature, writer):
+
+
 def classifier_execution(params):
     classifier = params[0]
     partitioner = params[1]
@@ -146,12 +157,12 @@ def classifier_execution(params):
     pred_label = []
 
     for train_index, test_index in kf.split(data):
-        X, y =  train_data(data, feature, train_index)
+        X, y = train_data(data, feature, train_index)
         for idx in test_index:
             preferences = data.iloc[idx].to_dict()
             true_value = preferences[feature]
             del preferences[feature]
-            resp =  join_preferences_key_values(
+            resp = join_preferences_key_values(
                 preferences)
             preferences_number = randint(2, len(resp))
             remove_preferences_number = len(
@@ -161,7 +172,7 @@ def classifier_execution(params):
                     0, len(resp)-1)
                 del resp[i]
             recommender = ClassifierFeatureRecommender(X, y, partitioner,
-                                                        classifier=classifier)
+                                                       classifier=classifier)
             recomendation = recommender.recommend(
                 feature, resp)
             if recomendation != None:
@@ -171,28 +182,30 @@ def classifier_execution(params):
     elapsed = end - start
     if len(true_label) > 0:
         accuracy = accuracy_score(true_label, pred_label)
-        clf_name =  classifier_name(classifier)
-        part_name =  partitioner_name(partitioner) + str(percentile)
+        clf_name = classifier_name(classifier)
+        part_name = partitioner_name(partitioner) + '-' + str(percentile)
         return [feature, clf_name, part_name, accuracy, elapsed]
     return []
 
-def run_regressors(  data, numerical_features, split_number, numerical_result_path):
+
+def run_regressors(data, numerical_features, split_number, numerical_result_path):
     kf = KFold(n_splits=split_number)
     with open(numerical_result_path, 'w') as f:
         writer = csv.writer(f, delimiter=';')
         writer.writerow(
             ['FEATURE', 'REGRESSOR', 'PARTITIONER', 'MSE', 'TIME'])
-        paramlist = list(itertools.product( regressors(),  partitioners(),
-                                             percentiles(), [kf], [data], numerical_features))
+        paramlist = list(itertools.product(regressors(),  partitioners(),
+                                           percentiles(), [kf], [data], numerical_features))
         pool = mp.Pool()
-        res  = pool.map(regressor_execution, paramlist)
+        res = pool.map(regressor_execution, paramlist)
         for row in res:
             if len(row) > 0:
                 writer.writerow(row)
         # for feature in numerical_features:
         #     for regressor in  regressors():
         #         for partitioner in  partitioners():
- 
+
+
 def regressor_execution(params):
     regressor = params[0]
     partitioner = params[1]
@@ -206,12 +219,12 @@ def regressor_execution(params):
     pred_label = []
 
     for train_index, test_index in kf.split(data):
-        X, y =  train_data(data, feature, train_index)
+        X, y = train_data(data, feature, train_index)
         for idx in test_index:
             preferences = data.iloc[idx].to_dict()
             true_value = preferences[feature]
             del preferences[feature]
-            resp =  join_preferences_key_values(
+            resp = join_preferences_key_values(
                 preferences)
             preferences_number = randint(2, len(resp))
             remove_preferences_number = len(
@@ -221,7 +234,7 @@ def regressor_execution(params):
                     0, len(resp)-1)
                 del resp[i]
             recommender = RegressorFeatureRecommender(X, y, partitioner,
-                                                        regressor=regressor)
+                                                      regressor=regressor)
             recomendation = recommender.recommend(
                 feature, resp)
             if recomendation != None:
@@ -231,7 +244,7 @@ def regressor_execution(params):
     elapsed = end - start
     if len(true_label) > 0:
         mse = mean_squared_error(true_label, pred_label)
-        regr_name =  regressor_name(regressor)
-        part_name =  partitioner_name(partitioner)
+        regr_name = regressor_name(regressor)
+        part_name = partitioner_name(partitioner) + '-' + str(percentile)
         return [feature, regr_name, part_name, mse, elapsed]
     return []

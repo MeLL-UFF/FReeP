@@ -57,7 +57,7 @@ categorical_features = ['cra', 'cdec']
 categorical_result_path = 'results/montage/categorical_results' + \
     time.strftime('%a, %d %b %Y %H:%M:%S ') + '.csv'
 
-run_classifier(data, categorical_features,
+experiment.run_classifier(data, categorical_features,
                           5, categorical_result_path)
 
 categorical_time_graph_path = 'results/montage/categorical_time_graph' + \
