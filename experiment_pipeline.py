@@ -1,6 +1,6 @@
 import time
 import pandas as pd
-from experiment_script import ExperimentScript
+import experiment_script as experiment
 from graph_generator import GraphGenerator
 
 data = pd.read_csv('sciphy.csv', float_precision='round_trip')
@@ -10,7 +10,6 @@ categorical_features = ['model1', 'model2']
 categorical_result_path = 'results/sciphy/categorical_results' + \
     time.strftime('%a, %d %b %Y %H:%M:%S ') + '.csv'
 
-experiment = ExperimentScript()
 experiment.run_classifier(data, categorical_features,
                           5, categorical_result_path)
 
@@ -58,8 +57,7 @@ categorical_features = ['cra', 'cdec']
 categorical_result_path = 'results/montage/categorical_results' + \
     time.strftime('%a, %d %b %Y %H:%M:%S ') + '.csv'
 
-experiment = ExperimentScript()
-experiment.run_classifier(data, categorical_features,
+run_classifier(data, categorical_features,
                           5, categorical_result_path)
 
 categorical_time_graph_path = 'results/montage/categorical_time_graph' + \
