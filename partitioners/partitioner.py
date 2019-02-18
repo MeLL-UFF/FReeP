@@ -10,14 +10,17 @@ class Partitioner(ABC):
         y_ = y.copy()
         weights_ = weights.copy()
         for preference in preferences:
-            #TODO preciso saber com filtrar por float de uma forma eficiente!!!
-            X_ = X_[eval(PreferenceProcessor.preference_for_eval(
-                preference, X.columns.values))]
-            # filtro os registros que possuem os mesmos valores das preferências
-            # indices dos pesos associados a essa partição
-            if len(weights) > 0:
-                weights_ = weights.loc[X_.index]
-            y_ = y.loc[X_.index]
+            try:
+                #TODO preciso saber com filtrar por float de uma forma eficiente!!!
+                X_ = X_[eval(PreferenceProcessor.preference_for_eval(
+                    preference, X.columns.values))]
+                # filtro os registros que possuem os mesmos valores das preferências
+                # indices dos pesos associados a essa partição
+                if len(weights) > 0:
+                    weights_ = weights.loc[X_.index]
+                y_ = y.loc[X_.index]
+            except NameError:
+                pass
         return X_, y_, weights_
     
     def vertical_filter(self, X, columns):

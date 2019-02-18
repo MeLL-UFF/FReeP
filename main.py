@@ -62,7 +62,7 @@ X = data.drop(feature, axis=1)
 # print("Recomendação por RANK para", feature, 'é', recomendation)
 
 print("Preferências: ", preferences)
-# recommender = MultiRecommendation(data, PCAPartitioner())
+recommender = MultiRecommendation(data, PCAPartitioner())
 # recommender = ClassifierFeatureRecommender(X, y, PCAPartitioner(), classifier=KNeighborsClassifier(n_neighbors=3))
 # recomendation = recommender.recommend(preferences)
 # print("MultiRecomendação: ", feature, 'é', recomendation)
