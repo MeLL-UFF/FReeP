@@ -141,7 +141,7 @@ def run_generic_recommendation(params):
     data = params[4]
     partitioner = partitioner(percentile)
 
-    sample = data.sample(10)
+    sample = data.sample(1)
     combined = data.append(sample)
     train = combined[~combined.index.duplicated(keep=False)]
 
@@ -179,6 +179,6 @@ def run_generic_recommendation(params):
     accuracy = mean(acc)
     mean_error = mean(mses)
     regr_name = regressor_name(regressor)
-    class_name = classifier_name(regressor)
+    class_name = classifier_name(classifier)
     part_name = partitioner_name(partitioner) + '-' + str(percentile)
     return [class_name, regr_name, part_name, mean_error, accuracy]
