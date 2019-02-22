@@ -176,9 +176,11 @@ def run_generic_recommendation(params):
         if len(cat_pred) > 0:
             accuracy = accuracy_score(cat_true, cat_pred)
             acc.append(accuracy)
-    accuracy = mean(acc)
-    mean_error = mean(mses)
-    regr_name = regressor_name(regressor)
-    class_name = classifier_name(classifier)
-    part_name = partitioner_name(partitioner) + '-' + str(percentile)
-    return [class_name, regr_name, part_name, mean_error, accuracy]
+    if len(acc) > 0:
+        accuracy = mean(acc)
+        mean_error = mean(mses)
+        regr_name = regressor_name(regressor)
+        class_name = classifier_name(classifier)
+        part_name = partitioner_name(partitioner) + '-' + str(percentile)
+        return [class_name, regr_name, part_name, mean_error, accuracy]
+    return []
