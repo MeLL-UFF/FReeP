@@ -183,8 +183,8 @@ def classifier_execution(params):
     elapsed = end - start
     if len(true_label) > 0:
         accuracy = accuracy_score(true_label, pred_label)
-        precision = precision_score(true_label, pred_label)
-        recall = recall_score(true_label, pred_label)
+        precision = precision_score(true_label, pred_label,average=None)
+        recall = recall_score(true_label, pred_label,average=None)
         clf_name = classifier_name(classifier)
         part_name = partitioner_name(partitioner) + '-' + str(percentile)
         return [feature, clf_name, part_name, accuracy, precision, recall, elapsed]
