@@ -141,7 +141,7 @@ def run_generic_recommendation(params):
     data = params[4]
     partitioner = partitioner(percentile)
 
-    sample = data.sample(10)
+    sample = data.sample(1)
     combined = data.append(sample)
     train = combined[~combined.index.duplicated(keep=False)]
 

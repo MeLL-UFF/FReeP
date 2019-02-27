@@ -30,7 +30,7 @@ def partitioner_name(partitioner):
     if type(partitioner) is PCAPartitioner:
         return 'PCA'
     elif type(partitioner) is PercentagePartitioner:
-        return 'Percentage'
+        return 'ANOVA'
     else:
         return 'Full'
 
@@ -123,12 +123,12 @@ def run_classifier(data, categorical_features, split_number, categorical_result_
     with open(categorical_result_path, 'w') as f:
         writer = csv.writer(f, delimiter=';')
         writer.writerow(
-            ['FEATURE', 'CLASSIFIER', 'PARTITIONER', 'ACCURACY', 'TIME'])
+            ['FEATURE', 'CLASSIFIER', 'PARTITIONER', 'ACCURACY', 'PRECISION', 'RECALL', 'TIME'])
         # for feature in categorical_features:
         #     for classifier in  classifiers():
         #         for partitioner in  classifiers():
         #             for percentile in  percentiles():
-        paramlist = list(itertools.product(classifiers(),  partitioners(),
+        paramlist = list(itertools.product(classifiers(), partitioners(),
                                            percentiles(), [kf], [data], categorical_features))
 
         pool = mp.Pool()
@@ -137,8 +137,9 @@ def run_classifier(data, categorical_features, split_number, categorical_result_
             if len(row) > 0:
                 writer.writerow(row)
 
-        #  classifier_execution(classifier, partitioner, percentile, kf, data,
-        #                           feature, writer)
+                #  classifier_execution(classifier, partitioner, percentile, kf, data,
+                #                           feature, writer)
+
 
 # def classifier_execution(  classifier, partitioner, percentile, kf, data, feature, writer):
 
@@ -169,7 +170,7 @@ def classifier_execution(params):
                 resp) - preferences_number
             for i in range(remove_preferences_number):
                 random_number = preferences_number = randint(
-                    0, len(resp)-1)
+                    0, len(resp) - 1)
                 del resp[random_number]
             recommender = ClassifierFeatureRecommender(X, y, partitioner,
                                                        classifier=classifier)
@@ -182,9 +183,11 @@ def classifier_execution(params):
     elapsed = end - start
     if len(true_label) > 0:
         accuracy = accuracy_score(true_label, pred_label)
+        precision = precision_score(true_label, pred_label)
+        recall = recall_score(true_label, pred_label)
         clf_name = classifier_name(classifier)
         part_name = partitioner_name(partitioner) + '-' + str(percentile)
-        return [feature, clf_name, part_name, accuracy, elapsed]
+        return [feature, clf_name, part_name, accuracy, precision, recall, elapsed]
     return []
 
 
@@ -194,16 +197,16 @@ def run_regressors(data, numerical_features, split_number, numerical_result_path
         writer = csv.writer(f, delimiter=';')
         writer.writerow(
             ['FEATURE', 'REGRESSOR', 'PARTITIONER', 'MSE', 'TIME'])
-        paramlist = list(itertools.product(regressors(),  partitioners(),
+        paramlist = list(itertools.product(regressors(), partitioners(),
                                            percentiles(), [kf], [data], numerical_features))
         pool = mp.Pool()
         res = pool.map(regressor_execution, paramlist)
         for row in res:
             if len(row) > 0:
                 writer.writerow(row)
-        # for feature in numerical_features:
-        #     for regressor in  regressors():
-        #         for partitioner in  partitioners():
+                # for feature in numerical_features:
+                #     for regressor in  regressors():
+                #         for partitioner in  partitioners():
 
 
 def regressor_execution(params):
@@ -231,7 +234,7 @@ def regressor_execution(params):
                 resp) - preferences_number
             for i in range(remove_preferences_number):
                 random_number = preferences_number = randint(
-                    0, len(resp)-1)
+                    0, len(resp) - 1)
                 del resp[random_number]
             recommender = RegressorFeatureRecommender(X, y, partitioner,
                                                       regressor=regressor)

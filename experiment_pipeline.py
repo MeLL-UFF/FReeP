@@ -25,6 +25,19 @@ graph_data = pd.read_csv(categorical_result_path, float_precision='round_trip', 
 graph_generator = GraphGenerator()
 graph_generator.bar_graph(graph_data, categorical_accuracy_graph_path, "PARTITIONER", "ACCURACY", "CLASSIFIER", "ACCURACY")
 
+categorical_precision_graph_path = 'results/sciphy/categorical_precision_graph' + \
+    time.strftime('%a, %d %b %Y %H:%M:%S ') + '.pdf'
+graph_data = pd.read_csv(categorical_result_path, float_precision='round_trip', sep=';')
+graph_generator = GraphGenerator()
+graph_generator.bar_graph(graph_data, categorical_precision_graph_path, "PARTITIONER", "PRECISION", "CLASSIFIER", "PRECISION")
+
+categorical_recall_graph_path = 'results/sciphy/categorical_recall_graph' + \
+    time.strftime('%a, %d %b %Y %H:%M:%S ') + '.pdf'
+graph_data = pd.read_csv(categorical_result_path, float_precision='round_trip', sep=';')
+graph_generator = GraphGenerator()
+graph_generator.bar_graph(graph_data, categorical_recall_graph_path, "PARTITIONER", "RECALL", "CLASSIFIER", "RECALL")
+
+
 #
 # ################################################################
 numerical_features = ['num_aligns', 'length', 'prob1', 'prob2']
