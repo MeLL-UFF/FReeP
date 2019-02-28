@@ -130,6 +130,7 @@ def run(data, result_path):
         pool = mp.Pool()
         res = pool.map(run_generic_recommendation, paramlist)
         for row in res:
+            print(row)
             if len(row) > 0:
                 writer.writerow(row)
 
@@ -164,6 +165,7 @@ def run_generic_recommendation(params):
         recommender = MultiRecommendation(
             train, partitioner, classifier, regressor)
         rec = recommender.recommend(preferences)
+        print(rec.item())
         num_pred = [v for k, v in rec.items() if not isinstance(v, str)]
         cat_pred = [v for k, v in rec.items() if isinstance(v, str)]
         num_true = [true_values[k]
@@ -183,4 +185,5 @@ def run_generic_recommendation(params):
         class_name = classifier_name(classifier)
         part_name = partitioner_name(partitioner) + '-' + str(percentile)
         return [class_name, regr_name, part_name, mean_error, accuracy]
-    return []
+    else:
+        return []
