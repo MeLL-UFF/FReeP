@@ -35,7 +35,7 @@ class MultiRecommendation():
 
         for voter in voters:
             tmp_columns_preferences = columns_in_preferences
-            tmp_preferences = preferences
+            tmp_preferences = preferences.copy()
             for column in voter:
                 y = self.data[column]
                 X = self.data.drop(

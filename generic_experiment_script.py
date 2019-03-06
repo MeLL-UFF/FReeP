@@ -33,7 +33,7 @@ def partitioner_name(partitioner):
     if type(partitioner) is PCAPartitioner:
         return 'PCA'
     elif type(partitioner) is PercentagePartitioner:
-        return 'Percentage'
+        return 'ANOVA'
     else:
         return 'Full'
 
@@ -72,35 +72,36 @@ def regressor_name(regressor):
 
 def classifiers():
     return [
-        KNeighborsClassifier(n_neighbors=3),
+        # KNeighborsClassifier(n_neighbors=3),
         KNeighborsClassifier(n_neighbors=5),
         KNeighborsClassifier(n_neighbors=7),
         SVC(probability=True),
-        MLPClassifier(solver='sgd', hidden_layer_sizes=(6,),
-                      random_state=1)
+        # MLPClassifier(solver='sgd', hidden_layer_sizes=(6,),
+        #   random_state=1)
     ]
 
 
 def partitioners():
     return [
-        PCAPartitioner,
+        # PCAPartitioner,
         PercentagePartitioner,
         # FullPartitioner()
     ]
 
 
 def percentiles():
-    return [30, 50, 70]
+    # return [30, 50, 70]
+    return [50]
 
 
 def regressors():
     return [
-        LinearRegression(),
-        KNeighborsRegressor(n_neighbors=3),
+        # LinearRegression(),
+        # KNeighborsRegressor(n_neighbors=3),
         KNeighborsRegressor(n_neighbors=5),
         KNeighborsRegressor(n_neighbors=7),
         SVR(),
-        MLPRegressor(solver='sgd', hidden_layer_sizes=(6,), random_state=1)
+        # MLPRegressor(solver='sgd', hidden_layer_sizes=(6,), random_state=1)
     ]
 
 
@@ -120,19 +121,19 @@ def train_data(data, feature, index):
     X = train_data.drop(feature, axis=1)
     return X, y
 
+
 def run(data, result_path):
     with open(result_path, 'w') as f:
         writer = csv.writer(f, delimiter=';')
         writer.writerow(
-            ['CLASSIFIER', 'REGRESSOR', 'PARTITIONER', 'MSE', 'ACCURACY'])
+            ['CLASSIFIER', 'REGRESSOR', 'PARTITIONER', 'MSE', 'PRECISION', 'RECALL'])
         paramlist = list(itertools.product(classifiers(), regressors(), partitioners(),
-                                        percentiles(), [data]))
+                                           percentiles(), [data]))
         pool = mp.Pool()
         res = pool.map(run_generic_recommendation, paramlist)
         for row in res:
-            print(row)
-            if len(row) > 0:
-                writer.writerow(row)
+            writer.writerow(row)
+
 
 def run_generic_recommendation(params):
     classifier = params[0]
@@ -142,12 +143,13 @@ def run_generic_recommendation(params):
     data = params[4]
     partitioner = partitioner(percentile)
 
-    sample = data.sample(1)
+    sample = data.sample(10)
     combined = data.append(sample)
     train = combined[~combined.index.duplicated(keep=False)]
 
     mses = []
-    acc = []
+    precisions = []
+    recalls = []
     for index, record in sample.iterrows():
         m = randint(2, len(record) - 2)
         l = list(range(len(record) - 2))
@@ -156,8 +158,14 @@ def run_generic_recommendation(params):
         for i in range(m):
             idx = random.choice(l)
             selected_idx.append(idx)
-            preferences.append(
-                str(record.keys()[idx]) + ' == ' + str(record.values[idx]))
+            param = record.keys()[idx]
+            val = record.values[idx]
+            if is_numeric_dtype(train[param]):
+                preferences.append(str(param) + ' == ' + str(val))
+            else:
+                preferences.append(str(param) + " == '" +
+                                   str(val) + "'")
+
             l.remove(idx)
         remain_idx = list(set(list(range(len(record)))) - set(selected_idx))
         true_values = dict(
@@ -165,7 +173,8 @@ def run_generic_recommendation(params):
         recommender = MultiRecommendation(
             train, partitioner, classifier, regressor)
         rec = recommender.recommend(preferences)
-        print(rec.item())
+        print("Preferências: " + str(preferences))
+        print("Recomendação: " + str(rec))
         num_pred = [v for k, v in rec.items() if not isinstance(v, str)]
         cat_pred = [v for k, v in rec.items() if isinstance(v, str)]
         num_true = [true_values[k]
@@ -176,14 +185,19 @@ def run_generic_recommendation(params):
             mse = mean_squared_error(num_true, num_pred)
             mses.append(mse)
         if len(cat_pred) > 0:
-            accuracy = accuracy_score(cat_true, cat_pred)
-            acc.append(accuracy)
-    if len(acc) > 0:
-        accuracy = mean(acc)
+            precision = precision_score(cat_true, cat_pred, average='weighted')
+            precisions.append(precision)
+            recall = recall_score(cat_true, cat_pred, average='weighted')
+            recalls.append(recall)
+            # accuracy = accuracy_score(cat_true, cat_pred)
+            # acc.append(accuracy)
+    if len(precisions) > 0:
+        recall = mean(recalls)
+        precision = mean(precisions)
         mean_error = mean(mses)
         regr_name = regressor_name(regressor)
         class_name = classifier_name(classifier)
         part_name = partitioner_name(partitioner) + '-' + str(percentile)
-        return [class_name, regr_name, part_name, mean_error, accuracy]
+        return [class_name, regr_name, part_name, mean_error, precision, recall]
     else:
         return []
