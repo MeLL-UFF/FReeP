@@ -126,7 +126,7 @@ def run(data, result_path):
     with open(result_path, 'w') as f:
         writer = csv.writer(f, delimiter=';')
         writer.writerow(
-            ['CLASSIFIER', 'REGRESSOR', 'PARTITIONER', 'MSE', 'PRECISION', 'RECALL'])
+            ['CLASSIFIER', 'REGRESSOR', 'PARTITIONER', 'MSE', 'PRECISION', 'RECALL', 'MISSING'])
         paramlist = list(itertools.product(classifiers(), regressors(), partitioners(),
                                            percentiles(), [data]))
         pool = mp.Pool()
@@ -150,6 +150,7 @@ def run_generic_recommendation(params):
     mses = []
     precisions = []
     recalls = []
+    missing_rec = 0
     for index, record in sample.iterrows():
         m = randint(2, len(record) - 2)
         l = list(range(len(record) - 2))
@@ -173,6 +174,8 @@ def run_generic_recommendation(params):
         recommender = MultiRecommendation(
             train, partitioner, classifier, regressor)
         rec = recommender.recommend(preferences)
+        if(len(rec) == 0):
+            missing_rec += 1
         print("Preferências: " + str(preferences))
         print("Recomendação: " + str(rec))
         num_pred = [v for k, v in rec.items() if not isinstance(v, str)]
@@ -198,6 +201,6 @@ def run_generic_recommendation(params):
         regr_name = regressor_name(regressor)
         class_name = classifier_name(classifier)
         part_name = partitioner_name(partitioner) + '-' + str(percentile)
-        return [class_name, regr_name, part_name, mean_error, precision, recall]
+        return [class_name, regr_name, part_name, mean_error, precision, recall, missing_rec]
     else:
         return []
