@@ -3,12 +3,12 @@ import pandas as pd
 import generic_experiment_script as experiment
 # from graph_generator import GraphGenerator
 
-sciphy = pd.read_csv('sciphy.csv', float_precision='round_trip')
-sciphy = sciphy[~sciphy['erro']].copy().drop('erro', axis=1).reset_index(drop=True)
-result_path = 'results/sciphy/generic_results' + \
-    time.strftime('%a, %d %b %Y %H:%M:%S ') + '.csv'
+# sciphy = pd.read_csv('sciphy.csv', float_precision='round_trip')
+# sciphy = sciphy[~sciphy['erro']].copy().drop('erro', axis=1).reset_index(drop=True)
+# result_path = 'results/sciphy/generic_results' + \
+#     time.strftime('%a, %d %b %Y %H:%M:%S ') + '.csv'
 
-experiment.run(sciphy, result_path)
+# experiment.run(sciphy, result_path)
 
 ######################################################################################
 ######################################################################################
