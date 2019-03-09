@@ -71,7 +71,7 @@ def run(data, path):
             ['FEATURE', 'MODEL', 'PRECISION', 'RECALL', 'TIME'])
         paramlist = list(itertools.product(neighbors(), [kf], [data],
                                            features, ["KNNFeatureRecommender", "RankFeatureRecommender"]))
-        pool = mp.Pool(1)
+        pool = mp.Pool()
         res = pool.map(execution, paramlist)
         for row in res:
             writer.writerow(row)
