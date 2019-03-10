@@ -39,7 +39,12 @@ class ClassifierFeatureRecommender(FeatureRecommender):
         instances = super(ClassifierFeatureRecommender,
                          self).to_predict_instance(X, partition_columns)
         predictions = self.classifier.predict(instances)
-        probs = np.array([max(l) for l in self.classifier.predict_proba(instances)])
+        probs = []
+        for instance in instances:
+            prob = max(self.classifier.predict_proba([instance])[0])
+            probs.append(prob)
+        probs = np.array(probs)
+        # probs = np.array([max(l) for l in self.classifier.predict_proba(instances)])
         return list(zip(predictions, probs))
 
     def marjority_prediction(self, X, y):

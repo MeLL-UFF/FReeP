@@ -130,9 +130,13 @@ def run(data, result_path):
         paramlist = list(itertools.product(classifiers(), regressors(), partitioners(),
                                            percentiles(), [data]))
         pool = mp.Pool()
-        res = pool.map(run_generic_recommendation, paramlist)
-        for row in res:
+        results = [pool.apply_async(run_generic_recommendation, args=(params,)) for params in paramlist]
+        output = [p.get() for p in results]
+        for row in output:
             writer.writerow(row)
+        # res = pool.map(run_generic_recommendation, paramlist)
+        # for row in res:
+        #     writer.writerow(row)
 
 
 def run_generic_recommendation(params):
@@ -194,13 +198,13 @@ def run_generic_recommendation(params):
             recalls.append(recall)
             # accuracy = accuracy_score(cat_true, cat_pred)
             # acc.append(accuracy)
+    part_name = partitioner_name(partitioner) + '-' + str(percentile)
+    regr_name = regressor_name(regressor)
+    class_name = classifier_name(classifier)
     if len(precisions) > 0:
         recall = mean(recalls)
         precision = mean(precisions)
         mean_error = mean(mses)
-        regr_name = regressor_name(regressor)
-        class_name = classifier_name(classifier)
-        part_name = partitioner_name(partitioner) + '-' + str(percentile)
         return [class_name, regr_name, part_name, mean_error, precision, recall, missing_rec]
     else:
-        return []
+        return [class_name, regr_name, part_name, -1, 0, 0, missing_rec]
