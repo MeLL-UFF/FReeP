@@ -56,7 +56,7 @@ def execution(params):
         true_label, pred_label, average='weighted')
     recall = recall_score(
         true_label, pred_label, average='weighted')
-    return [feature, _class, precision, recall, elapsed]
+    return [feature, _class, neighbor, precision, recall, elapsed]
 
 def run(data, path):
     # data = pd.read_csv('data.csv', float_precision='round_trip')
@@ -68,7 +68,7 @@ def run(data, path):
     with open(path, 'w') as f:
         writer = csv.writer(f, delimiter=';')
         writer.writerow(
-            ['FEATURE', 'MODEL', 'PRECISION', 'RECALL', 'TIME'])
+            ['FEATURE', 'MODEL', 'K', 'PRECISION', 'RECALL', 'TIME'])
         paramlist = list(itertools.product(neighbors(), [kf], [data],
                                            features, ["KNNFeatureRecommender", "RankFeatureRecommender"]))
         pool = mp.Pool()
