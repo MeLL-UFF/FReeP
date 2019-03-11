@@ -74,8 +74,8 @@ def classifiers():
     return [
         # KNeighborsClassifier(n_neighbors=3),
         KNeighborsClassifier(n_neighbors=5),
-        KNeighborsClassifier(n_neighbors=7),
-        SVC(probability=True),
+        # KNeighborsClassifier(n_neighbors=7),
+        # SVC(probability=True),
         # MLPClassifier(solver='sgd', hidden_layer_sizes=(6,),
         #   random_state=1)
     ]
@@ -99,8 +99,8 @@ def regressors():
         # LinearRegression(),
         # KNeighborsRegressor(n_neighbors=3),
         KNeighborsRegressor(n_neighbors=5),
-        KNeighborsRegressor(n_neighbors=7),
-        SVR(),
+        # KNeighborsRegressor(n_neighbors=7),
+        # SVR(),
         # MLPRegressor(solver='sgd', hidden_layer_sizes=(6,), random_state=1)
     ]
 
@@ -147,7 +147,7 @@ def run_generic_recommendation(params):
     data = params[4]
     partitioner = partitioner(percentile)
 
-    sample = data.sample(10)
+    sample = data.sample(1)
     combined = data.append(sample)
     train = combined[~combined.index.duplicated(keep=False)]
 
