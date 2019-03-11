@@ -32,20 +32,22 @@ class ClassifierFeatureRecommender(FeatureRecommender):
 
     def process_vote(self, votes):
         decode = self.preprocessor.decode_y(votes[0][0])
-        return [(decode, votes[0][1])]
+        # return [(decode, votes[0][1])]
+        return [(decode, )]
 
     def classifier_prediction(self, X, y, partition_columns):
         self.classifier.fit(X.values, y.values)
         instances = super(ClassifierFeatureRecommender,
                          self).to_predict_instance(X, partition_columns)
         predictions = self.classifier.predict(instances)
-        probs = []
-        for instance in instances:
-            prob = max(self.classifier.predict_proba([instance])[0])
-            probs.append(prob)
-        probs = np.array(probs)
+        # probs = []
+        # for instance in instances:
+        #     prob = max(self.classifier.predict_proba([instance])[0])
+        #     probs.append(prob)
+        # probs = np.array(probs)
         # probs = np.array([max(l) for l in self.classifier.predict_proba(instances)])
-        return list(zip(predictions, probs))
+        # return list(zip(predictions, probs))
+        return list(zip(predictions, ))
 
     def marjority_prediction(self, X, y):
         counts = np.bincount(y.values.astype(int))
