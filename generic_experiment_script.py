@@ -130,20 +130,20 @@ def run(data, result_path):
         paramlist = list(itertools.product(classifiers(), regressors(), partitioners(),
                                            percentiles(), [data]))
 
-        res = []
-        for params in paramlist:
-            r = run_generic_recommendation(params)
-            res.append(r)
-        for row in res:
-            writer.writerow(row)
-        # pool = mp.Pool()
-        # results = [pool.apply_async(run_generic_recommendation, args=(params,)) for params in paramlist]
-        # output = [p.get() for p in results]
-        # for row in output:
-        #     writer.writerow(row)
-        # res = pool.map(run_generic_recommendation, paramlist)
+        # res = []
+        # for params in paramlist:
+        #     r = run_generic_recommendation(params)
+        #     res.append(r)
         # for row in res:
         #     writer.writerow(row)
+        pool = mp.Pool()
+        results = [pool.apply_async(run_generic_recommendation, args=(params,)) for params in paramlist]
+        output = [p.get() for p in results]
+        for row in output:
+            writer.writerow(row)
+            # res = pool.map(run_generic_recommendation, paramlist)
+            # for row in res:
+            #     writer.writerow(row)
 
 
 def run_generic_recommendation(params):
@@ -185,7 +185,7 @@ def run_generic_recommendation(params):
         recommender = MultiRecommendation(
             train, partitioner, classifier, regressor)
         rec = recommender.recommend(preferences)
-        if(len(rec) == 0):
+        if (len(rec) == 0):
             missing_rec += 1
         print("Preferências: " + str(preferences))
         print("Recomendação: " + str(rec))
@@ -208,10 +208,14 @@ def run_generic_recommendation(params):
     part_name = partitioner_name(partitioner) + '-' + str(percentile)
     regr_name = regressor_name(regressor)
     class_name = classifier_name(classifier)
+    recall = 0
+    precision = 0
+    mean_error = -1
     if len(precisions) > 0:
         recall = mean(recalls)
         precision = mean(precisions)
+
+    if len(mses) > 0:
         mean_error = mean(mses)
-        return [class_name, regr_name, part_name, mean_error, precision, recall, missing_rec]
-    else:
-        return [class_name, regr_name, part_name, -1, 0, 0, missing_rec]
+
+    return [class_name, regr_name, part_name, mean_error, precision, recall, missing_rec]
