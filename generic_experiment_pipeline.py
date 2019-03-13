@@ -16,7 +16,7 @@ import generic_experiment_script as experiment
 montage = pd.read_csv('montage.csv', float_precision='round_trip')
 columns = ['cntr', 'ra', 'dec', 'cra', 'cdec', 'crval1', 'crval2', 'crota2']
 montage = montage[columns]
-montage = montage.sample(750)
+montage = montage.sample(500)
 
 result_path = 'results/montage/generic_results' + \
     time.strftime('%a, %d %b %Y %H:%M:%S ') + '.csv'
