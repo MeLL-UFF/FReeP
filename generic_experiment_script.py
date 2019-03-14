@@ -123,7 +123,7 @@ def train_data(data, feature, index):
 
 
 def run(data, result_path):
-    with open(result_path, 'w', 0) as f:
+    with open(result_path, 'w', 1) as f:
         writer = csv.writer(f, delimiter=';')
         writer.writerow(
             ['CLASSIFIER', 'REGRESSOR', 'PARTITIONER', 'MSE', 'PRECISION', 'RECALL', 'MISSING'])
