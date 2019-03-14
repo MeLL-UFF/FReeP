@@ -123,7 +123,7 @@ def train_data(data, feature, index):
 
 
 def run(data, result_path):
-    with open(result_path, 'w') as f:
+    with open(result_path, 'w', 0) as f:
         writer = csv.writer(f, delimiter=';')
         writer.writerow(
             ['CLASSIFIER', 'REGRESSOR', 'PARTITIONER', 'MSE', 'PRECISION', 'RECALL', 'MISSING'])
@@ -132,7 +132,9 @@ def run(data, result_path):
 
         res = []
         for params in paramlist:
+            print(params)
             r = run_generic_recommendation(params)
+            print(r)
             res.append(r)
         for row in res:
             writer.writerow(row)
