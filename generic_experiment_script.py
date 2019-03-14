@@ -130,17 +130,17 @@ def run(data, result_path):
         paramlist = list(itertools.product(classifiers(), regressors(), partitioners(),
                                            percentiles(), [data]))
 
-        # res = []
-        # for params in paramlist:
-        #     r = run_generic_recommendation(params)
-        #     res.append(r)
-        # for row in res:
-        #     writer.writerow(row)
-        pool = mp.Pool()
-        results = [pool.apply_async(run_generic_recommendation, args=(params,)) for params in paramlist]
-        output = [p.get() for p in results]
-        for row in output:
+        res = []
+        for params in paramlist:
+            r = run_generic_recommendation(params)
+            res.append(r)
+        for row in res:
             writer.writerow(row)
+#        pool = mp.Pool()
+ #       results = [pool.apply_async(run_generic_recommendation, args=(params,)) for params in paramlist]
+  #      output = [p.get() for p in results]
+   #     for row in output:
+    #        writer.writerow(row)
             # res = pool.map(run_generic_recommendation, paramlist)
             # for row in res:
             #     writer.writerow(row)
