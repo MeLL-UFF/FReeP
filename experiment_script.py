@@ -267,7 +267,7 @@ def regressor_execution(params):
         mse_validation = mean_squared_error(true_label, pred_label)
         regr_validation = regressor_name(regressor)
         part_validation = partitioner_name(partitioner) + '-' + str(percentile)
-        validations_results.append(feature, regr_validation, part_validation, mse_validation, elapsed_validation])
+        validations_results.append([feature, regr_validation, part_validation, mse_validation, elapsed_validation])
 
     # if len(true_label) > 0:
     #     mse = mean_squared_error(true_label, pred_label)
