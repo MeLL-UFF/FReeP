@@ -186,9 +186,14 @@ def classifier_execution(params):
                 pred_validation.append(recomendation[0])
         end_validation = time.time()
         elapsed_validation = end_validation - start
-        acc_validation = accuracy_score(true_validation, pred_validation)
-        precision_validation = precision_score(true_validation, pred_validation,average='weighted')
-        recall_validation = recall_score(true_validation, pred_validation,average='weighted')
+        if len(true_validation) > 0:
+            acc_validation = accuracy_score(true_validation, pred_validation)
+            precision_validation = precision_score(true_validation, pred_validation,average='weighted')
+            recall_validation = recall_score(true_validation, pred_validation,average='weighted')
+        else:
+            acc_validation = -1
+            precision_validation = -1
+            recall_validation = -1
         clf_validation = classifier_name(classifier)
         part_validation = partitioner_name(partitioner) + '-' + str(percentile)
         validations_results.append([feature, clf_validation, part_validation, acc_validation, precision_validation, recall_validation, elapsed_validation])
@@ -264,7 +269,10 @@ def regressor_execution(params):
                 pred_validation.append(recomendation[0])
         end_validation = time.time()
         elapsed_validation = end_validation - start
-        mse_validation = mean_squared_error(true_label, pred_label)
+        if len(true_validation) > 0:
+            mse_validation = mean_squared_error(true_validation, pred_validation)
+        else:
+            mse_validation = -1    
         regr_validation = regressor_name(regressor)
         part_validation = partitioner_name(partitioner) + '-' + str(percentile)
         validations_results.append([feature, regr_validation, part_validation, mse_validation, elapsed_validation])
