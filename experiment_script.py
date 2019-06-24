@@ -134,8 +134,9 @@ def run_classifier(data, categorical_features, split_number, categorical_result_
         pool = mp.Pool()
         res = pool.map(classifier_execution, paramlist)
         for row in res:
-            if len(row) > 0:
-                writer.writerow(row)
+            for validation in row:
+                if len(validation) > 0:
+                    writer.writerow(validation)
 
                 #  classifier_execution(classifier, partitioner, percentile, kf, data,
                 #                           feature, writer)
@@ -156,9 +157,11 @@ def classifier_execution(params):
     start = time.time()
     true_label = []
     pred_label = []
-
+    validations_results = []
     for train_index, test_index in kf.split(data):
         X, y = train_data(data, feature, train_index)
+        true_validation = []
+        pred_validation = []
         for idx in test_index:
             preferences = data.iloc[idx].to_dict()
             true_value = preferences[feature]
@@ -179,16 +182,26 @@ def classifier_execution(params):
             if recomendation != None:
                 true_label.append(true_value)
                 pred_label.append(recomendation[0])
+                true_validation.append(true_value)
+                pred_validation.append(recomendation[0])
+        end_validation = time.time()
+        elapsed_validation = end_validation - start
+        acc_validation = accuracy_score(true_validation, pred_validation)
+        precision_validation = precision_score(true_validation, pred_validation,average='weighted')
+        recall_validation = recall_score(true_validation, pred_validation,average='weighted')
+        clf_validation = classifier_name(classifier)
+        part_validation = partitioner_name(partitioner) + '-' + str(percentile)
+        validations_results.append([feature, clf_validation, part_validation, acc_validation, precision_validation, recall_validation, elapsed_validation])
     end = time.time()
-    elapsed = end - start
-    if len(true_label) > 0:
-        accuracy = accuracy_score(true_label, pred_label)
-        precision = precision_score(true_label, pred_label,average='weighted')
-        recall = recall_score(true_label, pred_label,average='weighted')
-        clf_name = classifier_name(classifier)
-        part_name = partitioner_name(partitioner) + '-' + str(percentile)
-        return [feature, clf_name, part_name, accuracy, precision, recall, elapsed]
-    return []
+    # elapsed = end - start
+    # if len(true_label) > 0:
+    #     accuracy = accuracy_score(true_label, pred_label)
+    #     precision = precision_score(true_label, pred_label,average='weighted')
+    #     recall = recall_score(true_label, pred_label,average='weighted')
+    #     clf_name = classifier_name(classifier)
+    #     part_name = partitioner_name(partitioner) + '-' + str(percentile)
+    #     return [feature, clf_name, part_name, accuracy, precision, recall, elapsed]
+    return validations_results
 
 
 def run_regressors(data, numerical_features, split_number, numerical_result_path):
@@ -202,8 +215,9 @@ def run_regressors(data, numerical_features, split_number, numerical_result_path
         pool = mp.Pool()
         res = pool.map(regressor_execution, paramlist)
         for row in res:
-            if len(row) > 0:
-                writer.writerow(row)
+              for validation in row:
+                if len(validation) > 0:
+                    writer.writerow(validation)
                 # for feature in numerical_features:
                 #     for regressor in  regressors():
                 #         for partitioner in  partitioners():
@@ -220,9 +234,12 @@ def regressor_execution(params):
     start = time.time()
     true_label = []
     pred_label = []
+    validations_results = []
 
     for train_index, test_index in kf.split(data):
         X, y = train_data(data, feature, train_index)
+        true_validation = []
+        pred_validation = []
         for idx in test_index:
             preferences = data.iloc[idx].to_dict()
             true_value = preferences[feature]
@@ -243,11 +260,18 @@ def regressor_execution(params):
             if recomendation != None:
                 true_label.append(true_value)
                 pred_label.append(recomendation[0])
-    end = time.time()
-    elapsed = end - start
-    if len(true_label) > 0:
-        mse = mean_squared_error(true_label, pred_label)
-        regr_name = regressor_name(regressor)
-        part_name = partitioner_name(partitioner) + '-' + str(percentile)
-        return [feature, regr_name, part_name, mse, elapsed]
-    return []
+                true_validation.append(true_value)
+                pred_validation.append(recomendation[0])
+        end_validation = time.time()
+        elapsed_validation = end_validation - start
+        mse_validation = mean_squared_error(true_label, pred_label)
+        regr_validation = regressor_name(regressor)
+        part_validation = partitioner_name(partitioner) + '-' + str(percentile)
+        validations_results.append(feature, regr_validation, part_validation, mse_validation, elapsed_validation])
+
+    # if len(true_label) > 0:
+    #     mse = mean_squared_error(true_label, pred_label)
+    #     regr_name = regressor_name(regressor)
+    #     part_name = partitioner_name(partitioner) + '-' + str(percentile)
+    #     return [feature, regr_name, part_name, mse, elapsed]
+    return validations_results
