@@ -1,11 +1,10 @@
 # FReep - Feature Recommender from Preferences
 
 
-### Requirements
+### Build Image
 
-* Python 3.5
-* Numpy
-* Pandas
-* sklearn
-* scipy
-* get_smarties: (pip install -e git+https://github.com/joeddav/get_smarties.git#egg=get_smarties)
+docker build -t freep .
+
+### Run for development
+
+docker run --rm -v $pwd:/app -w /app -it freep bash
