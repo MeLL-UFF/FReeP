@@ -16,15 +16,12 @@ from ..recommenders import classifier
 from ..recommenders import regressor
 
 
-def recommend(
-    data,
-    preferences,
-    partitioner,
-    regressor_model=SVR(),
-    classifier_model=SVC(),
-    min_neighbors=3,
-    max_iter=5,
-):
+def recommend(data,    preferences,    partitioner,
+              regressor_model=SVR(),
+              classifier_model=SVC(probability=True),
+              min_neighbors=3,
+              max_iter=5,
+              ):
     columns_in_preferences = parameters_in_preferences(
         preferences, data.columns.values
     )
@@ -53,18 +50,22 @@ def recommend(
             if is_numeric_dtype(y):
                 vote = regressor.recommend(
                     X, y, column, tmp_preferences, partitioner,
-                    regressor, min_neighbors)
+                    regressor_model, min_neighbors)
             else:
                 vote = classifier.recommend(
                     X, y, column, tmp_preferences, partitioner,
                     classifier_model, min_neighbors)
-
-            votes[column].append(vote[0])
-            preference = preference_to_append(y, column, vote[0])
-            tmp_preferences.append(preference)
-            tmp_columns_preferences.append(column)
+            
+            if vote:
+                votes[column].append(vote[0])
+                preference = preference_to_append(y, column, vote[0])
+                tmp_preferences.append(preference)
+                tmp_columns_preferences.append(column)
     resp = {}
     for param, vts in votes.items():
-        elected = Counter(vts).most_common(1)[0][0]
-        resp[param] = elected
+        if len(vts)>0:
+            elected = Counter(vts).most_common(1)[0][0]
+            resp[param] = elected
+        else:
+            resp[param] = None
     return resp

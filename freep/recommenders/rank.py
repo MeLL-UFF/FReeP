@@ -13,6 +13,11 @@ class PreferenceRelation():
         self.classes = classes
         self.model = model
 
+def recommend(X, y, feature, preferences, partitioner, model,
+              min_neighbors):
+    return commons.recommend(X, y, feature, preferences, partitioner, model, min_neighbors,
+                             recommender, process_vote, recomendation)
+
 
 def recommender(X, y, feature, preferences, model, min_neighbors=3):
     # as classes do meu problema são os valores da feature que quero recomendar
@@ -66,22 +71,22 @@ def recommender(X, y, feature, preferences, model, min_neighbors=3):
 
 def recomendation(votes):
     #TODO corrigir esse BordaCount pra devolver probabilidades entre 0 e 1!
-    classes_set = set([t[0] for rank in votes for t in rank])
+    classes_set = set([t[0] for rank_vote in votes for t in rank_vote])
     classes = dict.fromkeys(classes_set, 0)
     already_voted = []
-    for rank in votes:
-        weight = len(rank) - 1
-        for vote in rank:
+    for rank_vote in votes:
+        weight = len(rank_vote) - 1
+        for vote in rank_vote:
             def y(actual_vote, votes):
                 return [vote for vote in votes if vote[1] == actual_vote[1]]
             if vote not in already_voted:
-                draw_votes = y(vote, rank)
+                draw_votes = y(vote, rank_vote)
                 for candidate, percentage in draw_votes:
                     classes[candidate] += np.power(2, weight) * percentage
                 already_voted += [(k, v) for (k, v) in draw_votes]
             weight -= 1
         already_voted = []
-    ordered_preferences = rank(classes)
+    ordered_preferences = commons.rank(classes)
     resp = [recomendation[0] for recomendation in ordered_preferences]
     return resp
 

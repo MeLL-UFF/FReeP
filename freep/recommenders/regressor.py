@@ -11,13 +11,13 @@ def recommend(X, y, feature, preferences, partitioner, model,
     return commons.recommend(X, y, feature, preferences, partitioner, model, min_neighbors,
                              recommender, process_vote, recomendation)
 
-def recommender(X, y, feature, preferences, regressor):
+def recommender(X, y, feature, preferences, regressor_model):
     """ X, y e preferences one-hot encoding"""
     # se só tem uma classe
     if len(np.unique(y.values)) == 1:
         return marjority_prediction(X, y)
     else:
-        return regression_prediction(X, y, preferences, regressor)
+        return regression_prediction(X, y, preferences, regressor_model)
 
 def recomendation(votes):
     l = [vote[0] for candidates in votes for vote in candidates]
@@ -29,10 +29,10 @@ def process_vote(votes, y_encoder):
     decode = decode_y(votes[0][0], y_encoder)
     return [(decode, votes[0][1])]
 
-def regression_prediction(X, y, preferences, regressor):
-    regressor.fit(X.values, y.values)
+def regression_prediction(X, y, preferences, regressor_model):
+    regressor_model.fit(X.values, y.values)
     instances = commons.to_predict_instance(X, preferences)
-    predictions = regressor.predict(instances)
+    predictions = regressor_model.predict(instances)
     return [(prediction, None) for prediction in predictions]
 
 def marjority_prediction(X, y):
