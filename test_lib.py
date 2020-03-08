@@ -1,17 +1,17 @@
+import freep
+from sklearn.svm import SVR
+from sklearn.svm import SVC
+import numpy as np
+import pandas as pd
+import random
+import csv
+import json
+import time
 import logging
-logging.basicConfig(format='%(levelname)s:%(asctime)s: %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
+logging.basicConfig(
+    format='%(levelname)s:%(asctime)s: %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
 logging.getLogger().setLevel(logging.DEBUG)
 
-import time
-import json
-import csv
-import random
-import pandas as pd
-import numpy as np
-from sklearn.svm import SVC
-from sklearn.svm import SVR
-
-import freep
 
 data = pd.read_csv('data.csv', float_precision='round_trip')
 data = pd.read_csv('data.csv', float_precision='round_trip')
@@ -40,6 +40,7 @@ logging.debug('Target: ' + feature)
 logging.debug('Preferences: ' + str(model_preferences))
 
 resp = freep.recommenders.classifier.recommend(X, y, feature, model_preferences,
-                                               freep.partitioners.pca, SVC(),
+                                               freep.partitioners.percentage,
+                                               SVC(probability=True),
                                                3)
-print(resp)
+print("Recomendation: " + str(resp))

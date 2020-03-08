@@ -36,6 +36,7 @@ def encoded_columns_in_original_columns(
     encoded_columns):
     resp = []
     for encoded_column in encoded_columns:
+
         if is_parameter_in_preferences(encoded_column, current_columns_in_preferences):
             resp.append(encoded_column)
         elif not is_parameter_in_preferences(

@@ -23,12 +23,23 @@ def vertical_filter(X, columns):
 
 
 def powerset(columns):
-    """ Conjunto das partes de todas as colunas das preferências, exceto o vazio"""
-    sets = reduce(
-        lambda result, x: result + [subset + [x] for subset in result], columns, [[]]
-    )
-    # apenas os conjuntos com pelo menos dois elementos
-    return [set_ for set_ in sets if len(set_) > 1]
+    # source: https://stackoverflow.com/a/19078726
+    """
+    Returns all the subsets of this set. This is a generator.
+    """
+
+    if len(columns) <= 0:
+        yield []
+    else:
+        for item in powerset(columns[1:]):
+            yield [columns[0]]+item
+            yield item
+    
+    # sets = reduce(
+    #     lambda result, x: result + [subset + [x] for subset in result], columns, [[]]
+    # )
+    # # apenas os conjuntos com pelo menos dois elementos
+    # return (set_ for set_ in sets if len(set_) > 1)
 
 def all_columns_present(partition, columns):
     return all(elem in columns for elem in partition)

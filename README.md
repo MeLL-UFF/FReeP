@@ -7,4 +7,4 @@ docker build -t freep .
 
 ### Run for development
 
-docker run --rm -v $pwd:/app -w /app -it freep bash
+docker run --rm -v ${PWD}:/app -w /app -it freep bash

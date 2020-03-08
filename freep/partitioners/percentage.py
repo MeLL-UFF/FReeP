@@ -6,7 +6,7 @@ from ..utils.preference_processor import parameters_in_preferences as check_para
 from ..partitioners import commons
 
 
-def partition(X, y, columns_in_preferences, percentile, score=f_classif):
+def partition(X, y, columns_in_preferences, percentile=70, score=f_classif):
     feature_selection = SelectPercentile(score, percentile=percentile)
     feature_selection.fit(X, y)
     encoded_columns = X.columns[feature_selection.get_support()].values

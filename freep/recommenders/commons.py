@@ -1,7 +1,11 @@
 import itertools
+from tqdm import tqdm
 from functools import reduce
 from abc import abstractmethod
 from numbers import Number
+import logging
+logging.basicConfig(format='%(levelname)s:%(asctime)s: %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
+logging.getLogger().setLevel(logging.DEBUG)
 
 from sklearn.preprocessing import LabelEncoder
 import numpy as np
@@ -24,31 +28,39 @@ def recommend(X, y, feature, preferences, partitioner, model, min_neighbors,
         preferences, X.columns.values)
 
     # one-hot encoding
+    logging.debug('Encoding data...')
     X_encoded, y_encoded, y_encoder = encode(X, y)
+
+    logging.debug('Generating partitions...')
     partitions_for_recommender = partitioner.partition(
         X_encoded, y_encoded, columns_in_preferences
     )
+    logging.debug('Partitions generated...')
     votes = []
-    for partition in partitions_for_recommender:
-        preferences_for_partition = get_preferences_for_partition(
-            X, partition, preferences)
 
-        # aplicar o filtro das preferencias no X e y originais
-        X_, y_, weights_ = partitioner.horizontal_filter(
-            X, y, preferences_for_partition
-        )
-        # tenho dados após o filtro horizontal?
-        if len(X_) >= min_neighbors:
-            # codificar X e y resultantes
-            X_encoded, y_encoded, y_encoder = encode(X_, y_)
-            # todas as colunas da partição atual estão no X_encoded?
-            if all_columns_present(partition, X_encoded.columns):
-                X_partition = partitioner.vertical_filter(X_encoded, partition)
-                vote = recommender(
-                    X_partition, y_encoded, feature, partition, model
-                )
-                processed_vote = process_vote(vote, y_encoder)
-                votes.append(processed_vote)
+    logging.debug('Iterating over partitions...')
+    for partition in tqdm(partitions_for_recommender):
+        if len(partition) > 1:
+            preferences_for_partition = get_preferences_for_partition(
+                X, partition, preferences)
+            # aplicar o filtro das preferencias no X e y originais
+            X_, y_, weights_ = partitioner.horizontal_filter( 
+                X, y, preferences_for_partition)
+            # logging.debug('Data to this partition: %s', str(X))
+            # tenho dados após o filtro horizontal?
+            if len(X_) >= min_neighbors:
+                # codificar X e y resultantes
+                X_encoded, y_encoded, y_encoder = encode(X_, y_)
+                # todas as colunas da partição atual estão no X_encoded?
+                if all_columns_present(partition, X_encoded.columns):
+                    X_partition = partitioner.vertical_filter(X_encoded, partition)
+                    vote = recommender(
+                        X_partition, y_encoded, feature, partition, model
+                    )
+                    processed_vote = process_vote(vote, y_encoder)
+                    votes.append(processed_vote)
+    
+    logging.debug('Votes: %s', str(votes))
     if votes:
         return recomendation(votes)
     else:

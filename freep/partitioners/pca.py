@@ -13,27 +13,26 @@ def partition(X, y, columns_in_preferences, percentile=70):
 
     partitions = []
     for combination in columns_in_preferences_powerset:
+        if len(combination) > 1:
+            combination_encoded_columns = encoded_columns_in_original_columns(
+                combination,columns_in_preferences, X.columns)
+            X_partition = X[combination_encoded_columns]
 
-        combination_encoded_columns = encoded_columns_in_original_columns(
-            columns_in_preferences, combination, X.columns)
-        X_partition = X[combination_encoded_columns]
+            pca_partition = PCA(n_components=2)
+            pca_partition.fit(X_partition)
+            partition_similarity_metric = pca_partition.singular_values_
 
-        pca_partition = PCA(n_components=2)
-        pca_partition.fit(X_partition)
-        partition_similarity_metric = pca_partition.singular_values_
+            diff_similarity_metric = np.linalg.norm(
+                original_similarity_metric - partition_similarity_metric)
 
-        diff_similarity_metric = np.linalg.norm(
-            original_similarity_metric - partition_similarity_metric)
-
-        partitions.append([diff_similarity_metric, X_partition.columns])
+            partitions.append([diff_similarity_metric, X_partition.columns])
 
     partitions = sorted(partitions, key=lambda x: x[0])
 
-    maximum_partitions = int(
-        len(X.columns) * (percentile / 100.0))
+    maximum_partitions = int(len(X.columns) * (percentile / 100.0))
 
-    partitions = partitions[:maximum_partitions]
-    partitions_for_recomender = [partition[1] for partition in partitions]
+    selected_partitions = partitions[:maximum_partitions]
+    partitions_for_recomender = [partition[1] for partition in selected_partitions]
 
     return partitions_for_recomender
 
