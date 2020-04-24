@@ -13,7 +13,7 @@ logging.basicConfig(
 logging.getLogger().setLevel(logging.DEBUG)
 
 
-data = pd.read_csv('data.csv', float_precision='round_trip')
+# data = pd.read_csv('data.csv', float_precision='round_trip')
 data = pd.read_csv('data.csv', float_precision='round_trip')
 data = data[~data['erro']].copy().drop('erro', axis=1).reset_index(drop=True)
 
