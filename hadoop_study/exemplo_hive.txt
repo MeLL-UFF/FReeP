@@ -1,0 +1,26 @@
+CREATE SCHEMA IF NOT EXISTS example;
+CREATE EXTERNAL TABLE IF NOT EXISTS example.csv_table
+(num_aligns STRING, length STRING, model1 STRING, prob1 STRING, model2 STRING, prob2 STRING, erro STRING)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE
+LOCATION 'hdfs://quickstart.cloudera:8020/user/root/example/input';
+
+select * from example.csv_table;
+
+CREATE TABLE example.orc_table
+(num_aligns STRING, length STRING, model1 STRING, prob1 STRING, model2 STRING, prob2 STRING, erro STRING)
+ROW FORMAT DELIMITED
+STORED AS ORC;
+
+INSERT INTO TABLE example.orc_table SELECT * FROM example.csv_table;
+
+select * from example.orc_table;
+
+from pyhive import hive
+conn = hive.Connection(host="localhost", port=10000, username="cloudera")
+cursor = conn.cursor()
+cursor.execute('SELECT * FROM example.orc_table LIMIT 10')
+print(cursor.fetchone())
+print(cursor.fetchall())
+

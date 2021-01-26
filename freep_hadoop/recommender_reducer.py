@@ -32,10 +32,12 @@ for line in sys.stdin:
         feature = list(data)[-1]
         y = data[feature]
         X = data.drop(feature, axis=1)
+        
         X_encoded, y_encoded, y_encoder = encode(X, y)
         # todas as colunas da partição atual estão no X_encoded?
         if all_columns_present(partition, X_encoded.columns):
             X_partition = pca.vertical_filter(X_encoded, partition)
+            print(X_partition)
             vote = classifier.recommender(
                 X_partition, y_encoded, feature, partition, SVC(probability=True))
             processed_vote = classifier.process_vote(vote, y_encoder)

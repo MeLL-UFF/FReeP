@@ -14,10 +14,15 @@ docker run --rm -v ${PWD}:/app -w /app -it freep bash
 
 ### Criar imagem Hadoop
 
-- docker build -f docker/hadoop/Dockerfile -t hadoop_freep .
+- docker build -f docker/hadoop/Dockerfile -t freep_hadoop .
 
 ### Rodar image haddop
-- docker run --rm -m 4G --memory-reservation 2G --memory-swap 8G --hostname=quickstart.cloudera --privileged=true -t -i -v $(pwd):/app --publish-all=true -p8888 -p8088 --name hadoop_freep  hadoop_freep /usr/bin/docker-quickstart
+- docker run --rm --hostname=quickstart.cloudera --privileged=true -itd -v $(pwd):/app -p 8888:8888 -p 7180:7180 -p 8181:80 -p 8088:8088 --name freep_hadoop  freep_hadoop /usr/bin/custom_quickstart.sh
+
+- docker run --rm -m 4G --memory-reservation 2G --memory-swap 8G --hostname=quickstart.cloudera --privileged=true -itd -v $(pwd):/app --publish-all=true --name hadoop_freep  hadoop_freep /usr/bin/docker-quickstart
+
+- /etc/init.d/ntpd start
+- /home/cloudera/cloudera-manager --express
 
 ### Verificar quais portas estão sendo usadas pelo HUE e pelo YARN
 - docker inspect hadoop_freep
@@ -34,4 +39,4 @@ docker run --rm -v ${PWD}:/app -w /app -it freep bash
 
 - hadoop fs -rm -r /user/freep/output
 
-- hadoop fs -put -f /app/mapred-site.xml /user/root/input/mapred-site.xml
+-  hdfs dfsadmin -report

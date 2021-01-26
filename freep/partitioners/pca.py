@@ -5,6 +5,8 @@ from ..utils.preference_processor import encoded_columns_in_original_columns
 from ..partitioners import commons
 
 def partition(X, y, columns_in_preferences, percentile=70):
+    # não quero usar todas as partições possíveis... por isso uso o PCA pra verificar quais 
+    # partições mantém mais a semelhança com os dados originais
     columns_in_preferences_powerset = commons.powerset(columns_in_preferences)
 
     pca_original = PCA(n_components=2)

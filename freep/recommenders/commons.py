@@ -75,7 +75,7 @@ def to_predict_instance(X, partition_columns):
     all_combinations = list(itertools.product(*values_for_preferences))
 
     instances = []
-    for combination in all_combinations:
+    for combination in tqdm(all_combinations):
         instance = []
         for column in X.columns:
             # se é um parametro dentro das preferencias

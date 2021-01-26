@@ -39,6 +39,8 @@ def run_cmd(args_list):
     s_return = proc.returncode
     return s_return, s_output, s_err
 
+logging.debug('Removendo dados de execução anterior...')
+(ret, out, err) = run_cmd(['hadoop', 'fs', '-rm','-r','/user/freep'])
 
 data = pd.read_csv('data.csv', float_precision='round_trip')
 data = data[~data['erro']].copy().drop('erro', axis=1).reset_index(drop=True)
@@ -96,6 +98,7 @@ print('Job status: %s %s %s' % (out.decode('utf-8'), str(ret), str(err)))
 
 ouput_path = '/user/freep/output/'
 votes = []
+import pdb; pdb.set_trace()
 with hdfs.open(ouput_path+'part-00000', 'rt') as fi:
     vote = eval(fi.readline())
     votes.append(vote)

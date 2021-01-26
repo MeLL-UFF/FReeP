@@ -33,14 +33,13 @@ preferences = preferences.split('\n')
 X = pd.read_csv(StringIO(X_TEXT), sep=",", float_precision='round_trip')
 y = pd.read_csv(StringIO(y_TEXT), sep=",", float_precision='round_trip')
 
-logging.debug('Reading data...')
+logging.debug('MAPPER')
 for line in sys.stdin:
     line = line.strip()
     if line:
         partition = line.split(',')
 
-        preferences_for_partition = get_preferences_for_partition(
-            X, partition, preferences)
+        preferences_for_partition = get_preferences_for_partition(X, partition, preferences)
         # aplicar o filtro das preferencias no X e y originais
         X_, y_, weights_ = pca.horizontal_filter(
             X, y, preferences_for_partition)

@@ -1,3 +1,7 @@
 pydoop
 libs/freep-0.0.1-py3-none-any.whl
 pyarrow 
+sasl
+thrift
+thrift-sasl
+PyHive
