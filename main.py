@@ -19,7 +19,7 @@ from preprocessors.encoding_processor import EncodingProcessor
 import time
 
 # lendo dados originais, preciso desse float precision pra ele não arredondar
-data = pd.read_csv('data.csv', float_precision='round_trip')
+data = pd.read_csv('sciphy.csv', float_precision='round_trip')
 # apenas os dados de sucesso, sem a coluna de erro
 data = data[~data['erro']].copy().drop('erro', axis=1).reset_index(drop=True)
 
@@ -64,8 +64,8 @@ X = data.drop(feature, axis=1)
 print("Preferências: ", preferences)
 recommender = MultiRecommendation(data, PCAPartitioner())
 # recommender = ClassifierFeatureRecommender(X, y, PCAPartitioner(), classifier=KNeighborsClassifier(n_neighbors=3))
-recomendation = recommender.recommend(preferences)
-print("MultiRecomendação: ", feature, 'é', recomendation)
+# recomendation = recommender.recommend(preferences)
+# print("MultiRecomendação: ", feature, 'é', recomendation)
 
 recommender = ClassifierFeatureRecommender(X, y, PCAPartitioner(), 
     classifier=KNeighborsClassifier(n_neighbors=3))
